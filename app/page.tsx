@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Restaurant = {
@@ -17,14 +18,36 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
       <section className="mx-auto max-w-2xl">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Link
+            href="/login"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
+          >
+            Google sign in
+          </Link>
+          <Link
+            href="/profile"
+            className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold"
+          >
+            Profile
+          </Link>
+          <Link
+            href="/private"
+            className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold"
+          >
+            Private page
+          </Link>
+        </div>
+
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-700">
-          HW2 / jk4908
+          HW3 / jk4908
         </p>
         <h1 className="text-4xl font-bold tracking-tight">
           My Favorite Restaurants
         </h1>
         <p className="mt-3 text-zinc-600">
-          A list of restaurants loaded from Supabase.
+          Assignment #2 restaurant data, now extended with Google authentication
+          and user profiles.
         </p>
 
         {error ? (

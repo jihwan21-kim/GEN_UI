@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Favorite Restaurants",
-  description: "Restaurants loaded from Supabase",
+  title: "Gen UI Auth Profile",
+  description: "Supabase restaurants, Google authentication, and user profiles",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
