@@ -42,10 +42,16 @@ export default async function PrivatePage() {
             Edit profile
           </Link>
           <Link
-            href="/"
+            href="/restaurants"
             className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white"
           >
             Restaurant list
+          </Link>
+          <Link
+            href="/"
+            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold"
+          >
+            Create & rate captions
           </Link>
           <form action="/auth/signout" method="post">
             <button
