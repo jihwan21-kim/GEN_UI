@@ -27,38 +27,57 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
-      <section className="mx-auto max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
-          HW3 / Authentication
-        </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">Sign in</h1>
-        <p className="mt-3 text-zinc-600">
-          Use Google to sign in. After your first login, you will be asked to
-          complete your profile.
-        </p>
-
-        <button
-          type="button"
-          onClick={signInWithGoogle}
-          disabled={isLoading}
-          className="mt-8 w-full rounded-xl bg-zinc-900 px-5 py-3 font-semibold text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? "Redirecting to Google..." : "Continue with Google"}
-        </button>
-
-        {errorMessage && (
-          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {errorMessage}
+    <main id="main-content" className="page-shell auth-page">
+      <section className="auth-layout">
+        <div className="auth-story">
+          <p className="eyebrow">Your corner of the city</p>
+          <h1 className="hero-title">
+            Good company.
+            <br />
+            Great punchlines.
+          </h1>
+          <p className="hero-description">
+            A home for your campus humor, city discoveries, and very strong food
+            opinions.
           </p>
-        )}
-
-        <Link
-          href="/"
-          className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
-        >
-          Back to restaurant list
-        </Link>
+          <div className="story-note">
+            <span aria-hidden="true">↗</span>
+            <p>
+              From the dorm room to the downtown detour.
+              <br />
+              <strong>Make yourself at home.</strong>
+            </p>
+          </div>
+        </div>
+        <div className="surface auth-card">
+          <span className="pill">WELCOME TO SIDE OF NYC</span>
+          <h2 className="section-title mt-6">Come on in.</h2>
+          <p className="mt-3 text-zinc-600 leading-relaxed">
+            Sign in to make AI captions, rate your favorites, and join the
+            conversation.
+          </p>
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            disabled={isLoading}
+            className="button mt-8 w-full"
+          >
+            {isLoading ? "Redirecting to Google…" : "Continue with Google"}
+            <span aria-hidden="true">↗</span>
+          </button>
+          <p className="mt-4 text-xs leading-relaxed text-zinc-500">
+            New here? After your first sign-in, we’ll help you set up your
+            profile.
+          </p>
+          {errorMessage && (
+            <p role="alert" className="notice notice-error mt-5">
+              {errorMessage}
+            </p>
+          )}
+          <Link href="/" className="text-link mt-8 inline-block">
+            ← Explore the feed first
+          </Link>
+        </div>
       </section>
     </main>
   );

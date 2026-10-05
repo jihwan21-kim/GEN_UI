@@ -100,9 +100,7 @@ export default function ProfileForm({
           aria-label="Profile photo"
           className="h-24 w-24 shrink-0 rounded-full border border-zinc-200 bg-zinc-100 bg-cover bg-center"
           style={
-            avatarUrl
-              ? { backgroundImage: `url("${avatarUrl}")` }
-              : undefined
+            avatarUrl ? { backgroundImage: `url("${avatarUrl}")` } : undefined
           }
         >
           {!avatarUrl && (
@@ -145,16 +143,12 @@ export default function ProfileForm({
         />
       </label>
 
-      <button
-        type="submit"
-        disabled={isSaving}
-        className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <button type="submit" disabled={isSaving} className="button w-full">
         {isSaving ? "Saving..." : "Save profile"}
       </button>
 
       {status && (
-        <p className="rounded-xl bg-zinc-100 p-3 text-sm text-zinc-700">
+        <p role="status" aria-live="polite" className="notice">
           {status}
         </p>
       )}
