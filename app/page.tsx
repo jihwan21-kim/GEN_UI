@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Caption, Score, dailyTopic } from "@/lib/captions";
-import CaptionFeed from "./caption-feed";
-
+import { Caption, Restaurant, Score } from "@/lib/captions";
+import RestaurantCaptions from "./restaurant-captions";
 export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [feed, score, votes] = await Promise.all([
+  const [restaurants, captions, scores, votes] = await Promise.all([
+    supabase.from("restaurants").select("id, name, category").order("id"),
     supabase
       .from("generations")
-      .select("id, topic, tone, caption, prompt, model, created_at")
+      .select(
+        "id, restaurant_id, topic, tone, caption, prompt, model, created_at",
+      )
+      .not("restaurant_id", "is", null)
       .order("created_at", { ascending: false })
       .limit(100),
     supabase.rpc("caption_scores"),
@@ -24,58 +26,84 @@ export default async function Home() {
           .eq("user_id", user.id)
       : Promise.resolve({ data: [], error: null }),
   ]);
+  const captionError = !!(captions.error || scores.error || votes.error);
   return (
-    <main className="min-h-screen bg-zinc-50 px-5 py-8 text-zinc-900 md:px-8">
-      <div className="mx-auto max-w-5xl">
-        <nav
-          aria-label="Main navigation"
-          className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-6"
-        >
-          <Link href="/" className="text-xl font-extrabold tracking-tight">
-            SIDE OF NYC<span className="text-emerald-700">.</span>
-          </Link>
-          <div className="flex flex-wrap items-center gap-5 text-sm font-semibold">
-            <Link href="/restaurants">Restaurant list</Link>
-            {user ? (
-              <>
-                <Link href="/profile">Profile</Link>
-                <Link href="/private">Member area</Link>
-                <form action="/auth/signout" method="post">
-                  <button>Sign out</button>
-                </form>
-              </>
-            ) : (
-              <Link href="/login">Sign in</Link>
-            )}
-          </div>
+    <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
+      <section className="mx-auto max-w-2xl">
+        <nav aria-label="Main navigation" className="mb-8 flex flex-wrap gap-2">
+          {user ? (
+            <>
+              <Link
+                href="/profile"
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold"
+              >
+                Profile
+              </Link>
+              <Link
+                href="/private"
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold"
+              >
+                Private page
+              </Link>
+              <form action="/auth/signout" method="post">
+                <button className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold">
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Google sign in
+            </Link>
+          )}
         </nav>
-        <header className="mt-12 max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">
-            Campus life, city-sized punchlines
+        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-700">
+          My NYC collection
+        </p>
+        <h1 className="text-4xl font-bold tracking-tight">
+          My Favorite Restaurants
+        </h1>
+        <p className="mt-3 text-zinc-600">
+          Explore the list, create an AI caption for a restaurant, and vote for
+          your favorites.
+        </p>
+        {restaurants.error ? (
+          <p
+            role="alert"
+            className="mt-10 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
+          >
+            Unable to load restaurants. Please try again later.
           </p>
-          <h1 className="mt-4 text-5xl font-extrabold leading-tight tracking-tight md:text-6xl">
-            New to New York.
-            <br />
-            Already have opinions.
-          </h1>
-          <p className="mt-5 text-lg text-zinc-600">
-            Turn food runs, dorm life, and weekend detours into AI captions.
-            Vote for the ones that get you.
-          </p>
-        </header>
-        <CaptionFeed
-          captions={(feed.data || []) as Caption[]}
-          scores={(score.data || []) as Score[]}
-          votes={votes.data || []}
-          userId={user?.id || null}
-          today={dailyTopic()}
-          loadError={!!(feed.error || score.error || votes.error)}
-        />
-        <footer className="mt-12 border-t border-zinc-200 py-6 text-xs text-zinc-500">
-          Made for campus conversations. AI captions are entertainment, not
-          verified city advice. Showing the latest 100 captions.
-        </footer>
-      </div>
+        ) : (
+          <ul className="mt-10 grid gap-4">
+            {((restaurants.data || []) as Restaurant[]).map((restaurant) => (
+              <li
+                key={restaurant.id}
+                className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+              >
+                <h2 className="text-xl font-semibold">{restaurant.name}</h2>
+                <p className="mt-1 text-zinc-600">{restaurant.category}</p>
+                <RestaurantCaptions
+                  restaurant={restaurant}
+                  captions={((captions.data || []) as Caption[]).filter(
+                    (c) => Number(c.restaurant_id) === restaurant.id,
+                  )}
+                  scores={(scores.data || []) as Score[]}
+                  votes={votes.data || []}
+                  userId={user?.id || null}
+                  loadError={captionError}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        {!restaurants.error && !restaurants.data?.length && (
+          <p className="mt-10 text-zinc-600">No restaurants found.</p>
+        )}
+      </section>
     </main>
   );
 }

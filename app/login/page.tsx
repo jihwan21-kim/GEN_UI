@@ -57,7 +57,7 @@ export default function LoginPage() {
           href="/"
           className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
         >
-          Back to caption feed
+          Back to restaurant list
         </Link>
       </section>
     </main>

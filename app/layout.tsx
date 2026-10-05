@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Side of NYC | Campus captions",
-  description: "Generate and rate AI captions about NYC food runs, dorm life, and weekend adventures.",
+  title: "My Favorite Restaurants",
+  description: "Explore restaurants and create and rate AI captions.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

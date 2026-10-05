@@ -35,36 +35,27 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## Assignment #4 — Side of NYC
+## Assignment #4 — Restaurant captions
 
-A caption feed for Sam: a Columbia junior, new to NYC, living in a dorm and exploring on weekends. It extends the existing Google login, profiles, and restaurant list (now at `/restaurants`).
+The existing restaurant list remains the home page. Each restaurant card includes AI caption generation and rating, using the existing Google login and profiles. `/restaurants` redirects to `/` so earlier links continue to work.
 
-### Features and intent
+- Logged-in users open a small generator inside a restaurant card, supply a short idea, and choose a tone. The server looks up the restaurant rather than trusting a client-supplied name.
+- Generated captions appear below the correct restaurant. Each row saves its restaurant foreign key, creator, caption, exact prompt, model, tone and timestamp.
+- Users insert one like/dislike per caption. A database unique constraint prevents duplicate votes, including concurrent requests. Saved votes remain visible after refresh.
+- Guests browse the list and captions, but must sign in to generate or vote. Individual votes and profiles are private; aggregate counts and caption content are public.
+- The generator allows 10 attempts per account per New York calendar day. The API key stays server-side.
 
-- Daily NYC/campus topic and three tones reduce blank-page friction and give people a shared conversation to return to.
-- Signed-in users generate and immediately publish a short Gemini caption. Store the caption, user's topic, full prompt, model, owner, and timestamp together.
-- Public feed with newest/top-rated sorting and today's-topic filter. Sorts apply to the latest 100 captions, rather than an all-time leaderboard.
-- Signed-in users insert one upvote/downvote per caption into `votes`. A unique constraint prevents duplicate votes, including concurrent requests. Votes are final in this version; no update/delete permission is granted.
-- Prompts and AI labels make provenance visible. Compared with a generic caption app, campus-specific topics, controlled tone, and transparent prompts aim to make content more relevant and easier to judge.
-- Private voting records; public aggregate counts. Profiles can only be read or edited by their owners. Restaurant and caption content remain publicly readable.
-- Atomic database quota: 10 AI attempts per account per New York calendar day. Failed provider attempts count toward this limit. The Gemini key stays on the server.
+This targets students like Sam through short, playful captions for familiar NYC restaurants. The compact per-restaurant layout gives the existing list fresh content without a separate feed or new navigation system. AI captions are humor, not verified reviews, prices, or opening hours. Prompts are visible for transparency. The latest 100 restaurant captions are loaded across the collection.
 
-### Setup and deployment
+### Setup and validation
 
-1. Run `supabase/hw4.sql` in the **existing** Supabase project, after checking the current tables/policies. It enables RLS for every public table and replaces policies on this app's five tables. Audit any additional tables and storage policies using its final queries.
-2. Retain `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Set `GEMINI_API_KEY` in Vercel as a server-only secret; optionally set `GEMINI_MODEL` to a supported text-generation model. `.env.example` contains placeholders only. Create a key at https://aistudio.google.com/apikey.
-3. Deploy the assignment commit on Vercel. Keep `/auth/callback` as the OAuth application callback and ensure the deployed origin is allowed in Supabase's redirect configuration.
-4. Turn off Vercel deployment protection for the submitted deployment. Verify anonymously in Incognito, then sign in and verify generation, voting, and profile editing.
-5. Submit the deployment URL associated with the exact commit, not a moving production alias.
+1. Apply `supabase/hw4.sql` to the existing project (after the HW3 schema). It can be re-run if the earlier HW4 migration was applied. Existing standalone captions are preserved but are not shown in the restaurant list. New inserts require a valid restaurant link.
+2. Retain the existing Supabase URL and publishable key. Set `GEMINI_API_KEY` as a server-only Vercel environment variable and optionally set `GEMINI_MODEL` to a supported Gemini text model. Do not prefix the key with `NEXT_PUBLIC_`.
+3. Audit the real database's additional tables/storage policies, test Google login, profile editing/avatar uploads, generation and saved prompt, saved votes, duplicate rejection and a second user's isolation.
+4. Disable Vercel deployment protection, test Incognito, and submit the immutable deployment URL for the exact commit.
 
-### Security boundaries
+The migration enables RLS on all public tables and replaces policies for the five app-owned tables. Restaurant/caption reads are public. Profiles and individual votes are owner-only. New captions must reference a restaurant; there is no user update/delete access for captions or votes. The limited aggregate function exposes only vote counts, and an atomic quota function uses the current authenticated user.
 
-The generation endpoint validates the session, same-origin request, topic length and tone before calling Gemini, and persists results using the user's Supabase session so RLS applies. Anonymous visitors have no mutation privileges. Database constraints validate references, vote values and caption lengths. Generation/counter timestamps cannot be supplied by the browser. The score function is a limited security-definer aggregate exposing no voter IDs; the quota function binds the counter to `auth.uid()`.
+RLS allows owners to insert caption rows directly through Supabase; provider provenance is assured through the application's Gemini endpoint, not every possible direct API insert. Real provider/auth integration still requires the service configuration above.
 
-RLS permits authenticated owners to insert generation rows directly through Supabase, as required for authenticated creation. It does **not** attest that every direct API insert came from Gemini; AI provenance is assured only through the app's generation endpoint. Server-verified provenance would require a separate privileged insertion path. This version is a classroom caption app, not a content-moderation platform.
-
-### Verification and PM feedback
-
-Before submission, check guest browsing, guest mutation rejection, Google login, AI generation and persisted prompt, saved vote after refresh, duplicate rejection, a second user's private profile/vote isolation, and avatar upload. Confirm mobile keyboard access and visible focus. The migration was tested against an embedded PostgreSQL instance with stub Auth/Storage schemas; the real project's remaining tables, storage policies and login flow still need integration verification.
-
-PM feedback has **not** been collected. During the Feedback Group, ask the PM to find a caption, vote, generate their own, and explain the saved-vote state. Record their comments and iterate before final submission; do not claim that feedback-driven iteration is complete until it happens.
+Collect PM feedback during the Feedback Group, record it, and implement it before final submission. This iteration implements the user's feedback to retain the restaurant list and use a minimal, consistent light theme. Feedback from the designated PM has not yet been supplied.

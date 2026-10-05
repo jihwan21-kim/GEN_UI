@@ -24,6 +24,9 @@ create table if not exists public.generation_usage (
   attempts integer not null default 1 check (attempts between 1 and 10),
   primary key (user_id, day)
 );
+-- Preserve earlier standalone captions; new captions must belong to a restaurant.
+alter table public.generations add column if not exists restaurant_id bigint references public.restaurants(id);
+create index if not exists generations_restaurant_idx on public.generations (restaurant_id, created_at desc);
 create index if not exists generations_created_at_idx on public.generations (created_at desc);
 create index if not exists votes_user_id_idx on public.votes (user_id);
 -- All public tables have RLS. Unused tables without policies default to deny.
@@ -50,9 +53,9 @@ grant select on public.restaurants to anon, authenticated;
 create policy restaurants_public_read on public.restaurants for select to anon, authenticated using (true);
 revoke all on public.generations from anon, authenticated;
 grant select on public.generations to anon, authenticated;
-grant insert (user_id, topic, tone, caption, prompt, model) on public.generations to authenticated;
+grant insert (user_id, restaurant_id, topic, tone, caption, prompt, model) on public.generations to authenticated;
 create policy generations_public_read on public.generations for select to anon, authenticated using (true);
-create policy generations_insert_own on public.generations for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy generations_insert_own on public.generations for insert to authenticated with check ((select auth.uid()) = user_id and restaurant_id is not null);
 revoke all on public.votes from anon, authenticated;
 grant select on public.votes to authenticated;
 grant insert (generation_id, user_id, value) on public.votes to authenticated;
@@ -63,7 +66,7 @@ create or replace function public.caption_scores()
 returns table (generation_id uuid, upvotes bigint, downvotes bigint)
 language sql stable security definer set search_path = '' as $$
   select g.id, count(v.id) filter (where v.value = 1), count(v.id) filter (where v.value = -1)
-  from (select id from public.generations order by created_at desc limit 100) g
+  from (select id from public.generations where restaurant_id is not null order by created_at desc limit 100) g
   left join public.votes v on v.generation_id = g.id group by g.id;
 $$;
 revoke all on function public.caption_scores() from public;
