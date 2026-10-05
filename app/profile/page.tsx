@@ -25,45 +25,59 @@ export default async function ProfilePage() {
     !profile?.first_name?.trim() || !profile?.last_name?.trim();
 
   return (
-    <main id="main-content" className="page-shell">
-      <section className="mx-auto max-w-5xl">
-        <header className="page-heading">
-          <p className="eyebrow">Make yourself at home</p>
-          <h1 className="page-title">Your profile.</h1>
-          <p className="hero-description">
-            A familiar face in a very big city.
-          </p>
-        </header>
-        <div className="profile-layout">
-          <aside>
-            <span className="pill">YOUR ACCOUNT</span>
-            <h2 className="mt-5 text-xl font-semibold">
-              The basics, beautifully simple.
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-              Add your name and a photo to make your space feel like you. Your
-              profile details are visible only to you.
+    <main className="min-h-screen bg-zinc-50 px-6 py-12 text-zinc-900">
+      <section className="mx-auto max-w-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
+              Profile
             </p>
-            <Link href="/private" className="text-link mt-6 inline-block">
-              ← Back to my space
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Your profile
+            </h1>
+          </div>
+
+          <div className="flex gap-2">
+            <Link
+              href="/private"
+              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-zinc-100"
+            >
+              Private page
             </Link>
-          </aside>
-          <div className="surface profile-card">
-            {needsProfile && (
-              <div className="notice mb-6">
-                Welcome! Add your first and last name to finish setting up your
-                profile.
-              </div>
-            )}
-            <ProfileForm
-              userId={user.id}
-              email={user.email ?? ""}
-              initialFirstName={profile?.first_name ?? ""}
-              initialLastName={profile?.last_name ?? ""}
-              initialAvatarUrl={profile?.avatar_url ?? ""}
-            />
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-zinc-100"
+              >
+                Sign out
+              </button>
+            </form>
           </div>
         </div>
+
+        {needsProfile && (
+          <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+            This is your first login. Please add your first and last name to
+            finish setting up your profile.
+          </div>
+        )}
+
+        <div className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <ProfileForm
+            userId={user.id}
+            email={user.email ?? ""}
+            initialFirstName={profile?.first_name ?? ""}
+            initialLastName={profile?.last_name ?? ""}
+            initialAvatarUrl={profile?.avatar_url ?? ""}
+          />
+        </div>
+
+        <Link
+          href="/"
+          className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
+        >
+          Back to caption feed
+        </Link>
       </section>
     </main>
   );

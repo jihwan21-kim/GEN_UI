@@ -98,7 +98,7 @@ export default function CaptionFeed({
   return (
     <>
       <section
-        className="surface create-panel my-10 grid gap-8 p-6 md:grid-cols-[1fr_1.1fr] md:p-8"
+        className="my-10 grid gap-8 rounded-3xl bg-white p-6 shadow-sm md:grid-cols-[1fr_1.1fr] md:p-8"
         aria-labelledby="create-heading"
       >
         <div>
@@ -149,7 +149,10 @@ export default function CaptionFeed({
                 ))}
               </select>
             </label>
-            <button disabled={busy || loadError} className="button w-full">
+            <button
+              disabled={busy || loadError}
+              className="rounded-xl bg-emerald-700 p-3 font-bold text-white disabled:opacity-50"
+            >
               {busy ? "Making your caption…" : "Generate & publish"}
             </button>
             <p className="text-xs text-zinc-500">
@@ -165,7 +168,10 @@ export default function CaptionFeed({
             <p className="mt-2 text-zinc-600">
               Browse freely. Sign in to create a caption or cast a vote.
             </p>
-            <Link href="/login" className="button mt-5">
+            <Link
+              href="/login"
+              className="mt-5 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white"
+            >
               Sign in with Google
             </Link>
           </div>
@@ -183,7 +189,7 @@ export default function CaptionFeed({
           <h2 id="feed-heading" className="text-2xl font-bold">
             The campus feed
           </h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-3">
             <label className="text-sm">
               View
               <select
@@ -209,11 +215,11 @@ export default function CaptionFeed({
           </div>
         </div>
         {loadError ? (
-          <div role="alert" className="notice">
+          <div role="alert" className="rounded-xl bg-amber-50 p-6">
             The feed couldn’t load. Please try again later.
           </div>
         ) : shown.length === 0 ? (
-          <div className="surface p-10 text-center text-zinc-600">
+          <div className="rounded-2xl border border-dashed border-zinc-300 p-10 text-center text-zinc-600">
             No captions here yet. Be the first to turn a NYC moment into a
             punchline.
           </div>
@@ -225,7 +231,7 @@ export default function CaptionFeed({
               return (
                 <article
                   key={c.id}
-                  className="surface caption-card flex flex-col p-6"
+                  className="flex flex-col rounded-2xl border border-zinc-200 bg-white p-6"
                   id={`caption-${c.id}`}
                 >
                   <div className="flex justify-between gap-3 text-xs font-semibold text-zinc-500">
