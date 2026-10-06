@@ -86,7 +86,7 @@ declare claimed integer; begin
 end $$;
 revoke all on function public.claim_generation_attempt() from public;
 grant execute on function public.claim_generation_attempt() to authenticated;
-alter table storage.objects enable row level security;
+-- Supabase already enables RLS on storage.objects; do not ALTER this managed table.
 drop policy if exists "Users can upload their own avatar" on storage.objects;
 create policy "Users can upload their own avatar" on storage.objects for insert to authenticated
 with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid()::text));
