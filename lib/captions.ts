@@ -5,6 +5,7 @@ export type Restaurant = {
   category: string;
   address?: string | null;
   photo_path?: string | null;
+  created_by?: string | null;
 };
 export type Caption = {
   id: string;

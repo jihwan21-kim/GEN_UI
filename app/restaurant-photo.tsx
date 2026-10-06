@@ -21,9 +21,12 @@ export default function RestaurantPhoto({
   const stock =
     photos[restaurant.category.toLowerCase()] ||
     "photo-1414235077428-338989a2e8c0";
+  const stockPhoto =
+    !restaurant.created_by && [1, 2, 3].includes(Number(restaurant.id));
+  const hasPhoto = !!uploaded || stockPhoto;
   return (
     <figure className="relative -mx-5 -mt-5 mb-5 overflow-hidden rounded-t-xl bg-zinc-100">
-      {!failed ? (
+      {hasPhoto && !failed ? (
         // Storage and category photos have dynamic URLs; the browser handles lazy loading.
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -44,12 +47,14 @@ export default function RestaurantPhoto({
         />
       ) : (
         <div className="flex h-48 items-center justify-center text-sm text-zinc-500 sm:h-56">
-          Photo unavailable
+          {hasPhoto ? "Photo unavailable" : "No photo yet"}
         </div>
       )}
-      <figcaption className="absolute bottom-2 right-2 rounded bg-white/90 px-2 py-1 text-xs text-zinc-600">
-        {uploaded ? "Community photo" : "Representative photo · Unsplash"}
-      </figcaption>
+      {hasPhoto && (
+        <figcaption className="absolute bottom-2 right-2 rounded bg-white/90 px-2 py-1 text-xs text-zinc-600">
+          {uploaded ? "Community photo" : "Representative photo · Unsplash"}
+        </figcaption>
+      )}
     </figure>
   );
 }

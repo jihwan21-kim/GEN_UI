@@ -1,13 +1,16 @@
 "use client";
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Restaurant } from "@/lib/captions";
 import { createClient } from "@/lib/supabase/client";
 export default function AddRestaurant({
   userId,
   available,
+  restaurant,
 }: {
   userId: string;
   available: boolean;
+  restaurant?: Restaurant;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -24,6 +27,7 @@ export default function AddRestaurant({
     const photo = data.get("photo") as File | null;
     const db = createClient();
     let path: string | null = null;
+    const removePhoto = data.get("removePhoto") === "on";
     setBusy(true);
     setMessage("");
     try {
@@ -44,27 +48,33 @@ export default function AddRestaurant({
           return;
         }
       }
-      const { error } = await db
-        .from("restaurants")
-        .insert({
-          name,
-          category,
-          address,
-          photo_path: path,
-          created_by: userId,
-        });
-      if (error) {
+      const fields = {
+        name,
+        category,
+        address,
+        photo_path:
+          path || (removePhoto ? null : restaurant?.photo_path || null),
+      };
+      const query = restaurant
+        ? db
+            .from("restaurants")
+            .update(fields)
+            .eq("id", restaurant.id)
+            .eq("created_by", userId)
+        : db.from("restaurants").insert({ ...fields, created_by: userId });
+      const { data: changed, error } = await query.select("id").single();
+      if (error || !changed) {
         if (path) await db.storage.from("restaurant-photos").remove([path]);
         setMessage(
-          error.code === "23505"
+          error?.code === "23505"
             ? "This restaurant at this address is already in the list."
-            : "Could not add the restaurant. Please check your details and try again.",
+            : "Could not save the restaurant. Please check your details and try again.",
         );
         return;
       }
-      form.reset();
+      if (!restaurant) form.reset();
       setOpen(false);
-      setMessage("Restaurant added.");
+      setMessage(restaurant ? "Restaurant updated." : "Restaurant added.");
       startTransition(() => router.refresh());
     } catch {
       setMessage("Couldn't reach the server. Please try again.");
@@ -74,15 +84,21 @@ export default function AddRestaurant({
   }
   const field = "mt-1 w-full rounded-lg border border-zinc-300 bg-white p-2.5";
   return (
-    <div className="mt-6">
+    <div className={restaurant ? "mt-3" : "mt-6 max-w-2xl"}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        aria-controls="add-restaurant"
+        aria-controls={
+          restaurant ? `edit-restaurant-${restaurant.id}` : "add-restaurant"
+        }
         disabled={!available || busy || refreshing}
         className="rounded-lg border border-emerald-700 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 disabled:opacity-50"
       >
-        {open ? "Close form" : "+ Add a restaurant"}
+        {open
+          ? "Close form"
+          : restaurant
+            ? "Edit restaurant"
+            : "+ Add a restaurant"}
       </button>
       {!available && (
         <p className="mt-2 text-sm text-zinc-500">
@@ -91,15 +107,20 @@ export default function AddRestaurant({
       )}
       {open && (
         <form
-          id="add-restaurant"
+          id={
+            restaurant ? `edit-restaurant-${restaurant.id}` : "add-restaurant"
+          }
           onSubmit={submit}
           className="mt-4 grid gap-3 rounded-xl border border-zinc-200 bg-white p-5"
         >
-          <h2 className="font-semibold">Share a NYC restaurant</h2>
+          <h2 className="font-semibold">
+            {restaurant ? "Edit your restaurant" : "Share a NYC restaurant"}
+          </h2>
           <label className="text-sm font-medium">
             Restaurant name
             <input
               name="name"
+              defaultValue={restaurant?.name}
               required
               minLength={2}
               maxLength={100}
@@ -110,6 +131,7 @@ export default function AddRestaurant({
             Food type
             <input
               name="category"
+              defaultValue={restaurant?.category}
               required
               minLength={2}
               maxLength={50}
@@ -121,6 +143,7 @@ export default function AddRestaurant({
             Street address
             <input
               name="address"
+              defaultValue={restaurant?.address || ""}
               required
               minLength={5}
               maxLength={200}
@@ -137,6 +160,12 @@ export default function AddRestaurant({
               className={field}
             />
           </label>
+          {restaurant?.photo_path && (
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="removePhoto" />
+              Remove current photo
+            </label>
+          )}
           <p className="text-xs text-zinc-500">
             Your submission will be public. Upload a photo you have permission
             to share. JPG, PNG or WebP, up to 5 MB.
@@ -145,7 +174,7 @@ export default function AddRestaurant({
             disabled={busy || refreshing}
             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Adding…" : "Add restaurant"}
+            {busy ? "Saving…" : restaurant ? "Save changes" : "Add restaurant"}
           </button>
         </form>
       )}

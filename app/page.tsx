@@ -14,7 +14,7 @@ export default async function Home() {
     await Promise.all([
       supabase
         .from("restaurants")
-        .select("id, name, category, address, photo_path")
+        .select("id, name, category, address, photo_path, created_by")
         .order("id"),
       supabase
         .from("generations")
@@ -50,7 +50,7 @@ export default async function Home() {
   const captionError = !!(captions.error || scores.error || votes.error);
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
-      <section className="mx-auto max-w-2xl">
+      <section className="mx-auto max-w-7xl">
         <nav aria-label="Main navigation" className="mb-8 flex flex-wrap gap-2">
           {user ? (
             <>
@@ -142,20 +142,30 @@ export default async function Home() {
             Unable to load restaurants. Please try again later.
           </p>
         ) : (
-          <ul className="mt-10 grid gap-4">
+          <ul className="mt-10 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
             {((restaurants.data || []) as Restaurant[]).map((restaurant) => (
               <li
                 key={restaurant.id}
                 id={`restaurant-${restaurant.id}`}
                 className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
               >
-                <RestaurantPhoto restaurant={restaurant} />
+                <RestaurantPhoto
+                  key={restaurant.photo_path || "empty"}
+                  restaurant={restaurant}
+                />
                 <h2 className="text-xl font-semibold">{restaurant.name}</h2>
                 <p className="mt-1 text-zinc-600">{restaurant.category}</p>
                 {restaurant.address && (
                   <p className="mt-1 text-sm text-zinc-500">
                     {restaurant.address}
                   </p>
+                )}
+                {user && restaurant.created_by === user.id && (
+                  <AddRestaurant
+                    userId={user.id}
+                    available
+                    restaurant={restaurant}
+                  />
                 )}
                 <RestaurantCaptions
                   restaurant={restaurant}
