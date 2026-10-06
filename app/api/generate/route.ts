@@ -96,16 +96,41 @@ export async function POST(request: Request) {
         signal: AbortSignal.timeout(45000),
       },
     );
-    if (!response.ok)
-      return Response.json(
-        {
-          error:
-            response.status === 429
-              ? "AI is busy. Please try again later."
-              : "AI generation failed. Please try again.",
-        },
-        { status: 502 },
-      );
+    if (!response.ok) {
+      const failure = await response.json().catch(() => null);
+      const providerMessage =
+        typeof failure?.error?.message === "string"
+          ? failure.error.message
+          : "";
+      const invalidKey =
+        /api.?key.*(invalid|not valid|expired)|API_KEY_INVALID|API_KEY_EXPIRED/i.test(
+          providerMessage,
+        ) ||
+        failure?.error?.details?.some((detail: { reason?: string }) =>
+          ["API_KEY_INVALID", "API_KEY_EXPIRED"].includes(detail.reason || ""),
+        );
+      let error = `Gemini request failed (HTTP ${response.status}). Please try again later.`;
+      if (invalidKey)
+        error =
+          "Gemini rejected the API key. Check the GEMINI_API_KEY setting and redeploy.";
+      else if (response.status === 404)
+        error = `Gemini model '${model}' is unavailable for this API key. Check GEMINI_MODEL in Vercel.`;
+      else if (response.status === 403 || response.status === 401)
+        error =
+          "Gemini access was denied. Check the API key's project, API restrictions, and model access.";
+      else if (response.status === 429)
+        error =
+          "Gemini usage quota or rate limit was reached. Check your AI Studio quota and try again later.";
+      else if (response.status === 400)
+        error =
+          "Gemini rejected the request (HTTP 400). Check the configured model and API key settings.";
+      console.error("Gemini generation failed", {
+        status: response.status,
+        model,
+        invalidKey: !!invalidKey,
+      });
+      return Response.json({ error }, { status: 502 });
+    }
     const result = await response.json();
     const text = result.candidates?.[0]?.content?.parts
       ?.filter(
