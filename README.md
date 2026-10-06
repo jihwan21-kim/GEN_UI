@@ -59,3 +59,11 @@ The migration enables RLS on all public tables and replaces policies for the fiv
 RLS allows owners to insert caption rows directly through Supabase; provider provenance is assured through the application's Gemini endpoint, not every possible direct API insert. Real provider/auth integration still requires the service configuration above.
 
 Collect PM feedback during the Feedback Group, record it, and implement it before final submission. This iteration implements the user's feedback to retain the restaurant list and use a minimal, consistent light theme. Feedback from the designated PM has not yet been supplied.
+
+## Restaurant community update
+
+After `supabase/hw4.sql`, apply `supabase/hw4_restaurants.sql` in the Supabase SQL Editor. If rerunning hw4.sql later, rerun the additive migration afterward as well. It adds restaurant address/photo/creator fields, authenticated restaurant submissions, a public photo bucket (5 MB JPG/PNG/WebP), owner-only vote updates/deletes, and anonymous aggregate popularity. It preserves existing rows. No new environment variables are needed.
+
+Google login now lands on `/` for both existing and new users. Profiles remain editable from navigation. Votes toggle off when pressed again, or switch when the opposite button is pressed. Restaurant ranking uses all linked captions' likes minus dislikes, with likes and restaurant ID as tie breakers; it is explicitly not a dining review score. Existing restaurants use labeled representative Unsplash food photos, not verified venue photos. Community submissions can upload their own photos. Name/address duplicates are rejected.
+
+Validation: lint and production build passed; 27 PostgreSQL permission/schema checks covered vote changes/cancellation, cross-user isolation, anonymous denial, restaurant ownership/photo paths, duplicate submissions, popularity, quota boundaries, and rerunning migrations. Live restaurant submission/photo upload require applying the additive SQL.

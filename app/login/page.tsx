@@ -34,8 +34,8 @@ export default function LoginPage() {
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight">Sign in</h1>
         <p className="mt-3 text-zinc-600">
-          Use Google to sign in. After your first login, you will be asked to
-          complete your profile.
+          Use Google to sign in and return to the restaurant list. You can edit
+          your profile at any time.
         </p>
 
         <button
