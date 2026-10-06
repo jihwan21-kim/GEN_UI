@@ -44,7 +44,7 @@ do $$ declare p record; begin
 end $$;
 revoke all on public.profiles from anon, authenticated;
 grant select on public.profiles to authenticated;
-grant insert (id, first_name, last_name, avatar_url), update (first_name, last_name, avatar_url) on public.profiles to authenticated;
+grant insert (id, first_name, last_name, avatar_url), update (id, first_name, last_name, avatar_url) on public.profiles to authenticated;
 create policy profiles_read_own on public.profiles for select to authenticated using ((select auth.uid()) = id);
 create policy profiles_insert_own on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
 create policy profiles_update_own on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
