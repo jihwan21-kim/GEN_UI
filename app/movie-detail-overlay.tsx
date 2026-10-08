@@ -14,6 +14,7 @@ export default function MovieDetailOverlay({
   userId,
   loadError,
   onClose,
+  isNewlyAdded = false,
 }: {
   movie: Movie;
   reviews: MovieReview[];
@@ -22,6 +23,7 @@ export default function MovieDetailOverlay({
   userId: string | null;
   loadError: boolean;
   onClose: () => void;
+  isNewlyAdded?: boolean;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -96,6 +98,11 @@ export default function MovieDetailOverlay({
         <div className="grid items-start gap-5 border-b border-zinc-100 bg-gradient-to-br from-zinc-50 to-amber-50/30 p-5 sm:grid-cols-[175px_1fr] sm:gap-7 sm:p-8">
           <MoviePoster movie={movie} className="mx-auto max-w-[150px] shadow-lg sm:mx-0 sm:max-w-none" />
           <div className="min-w-0 self-center pr-9 sm:pr-5">
+            {isNewlyAdded && (
+              <p role="status" className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800">
+                <span aria-hidden="true">✓</span> Added to your collection
+              </p>
+            )}
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">Film · {movie.release_year}</p>
             <h2 id={`film-detail-heading-${movie.id}`} className="mt-2 break-words text-2xl font-black tracking-tight sm:text-4xl">
               {movie.title}
