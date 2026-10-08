@@ -38,12 +38,6 @@ export default async function ProfilePage() {
           </div>
 
           <div className="flex gap-2">
-            <Link
-              href="/private"
-              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-zinc-100"
-            >
-              Private page
-            </Link>
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
