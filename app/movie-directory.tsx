@@ -2,18 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { Movie, MovieReview, MovieScore, MovieVote } from "@/lib/movies";
+import type { PublicAuthor } from "@/lib/community";
 import MoviePoster from "./movie-poster";
 import MovieReviews from "./movie-reviews";
 import MovieDetailOverlay from "./movie-detail-overlay";
 import { useRequiredMovieSelection } from "./movie-selection-context";
 
 export default function MovieDirectory({
-  movies, reviews, scores, votes, userId, loadError,
+  movies, reviews, scores, votes, userId, loadError, authors,
 }: {
   movies: Movie[];
   reviews: MovieReview[];
   scores: MovieScore[];
   votes: MovieVote[];
+  authors: Record<string, PublicAuthor>;
   userId: string | null;
   loadError: boolean;
 }) {
@@ -132,6 +134,7 @@ export default function MovieDirectory({
               <div className="mt-auto border-t border-zinc-100 pt-4">
                 <MovieReviews
                   variant="preview"
+                  authors={authors}
                   onOpenDetails={() => showMovie(movie.id)}
                   movie={movie}
                   reviews={reviews.filter((review) => Number(review.movie_id) === Number(movie.id))}
@@ -163,6 +166,7 @@ export default function MovieDirectory({
           key={selectedMovie.id}
           movie={selectedMovie}
           reviews={reviews.filter((review) => Number(review.movie_id) === Number(selectedMovie.id))}
+          authors={authors}
           scores={scores}
           votes={votes}
           userId={userId}
