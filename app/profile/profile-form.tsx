@@ -91,14 +91,14 @@ export default function ProfileForm({
   return (
     <form onSubmit={handleSubmit} className="grid gap-5">
       <div>
-        <p className="text-sm font-medium text-zinc-500">Signed in as</p>
-        <p className="mt-1 font-medium">{email}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">Signed in as</p>
+        <p className="mt-2 break-all text-sm font-medium text-zinc-100">{email}</p>
       </div>
 
       <div className="flex items-center gap-5">
         <div
           aria-label="Profile photo"
-          className="h-24 w-24 shrink-0 rounded-full border border-zinc-200 bg-zinc-100 bg-cover bg-center"
+          className="h-24 w-24 shrink-0 rounded-full border-2 border-amber-400/40 bg-[#101115] bg-cover bg-center shadow-lg"
           style={
             avatarUrl
               ? { backgroundImage: `url("${avatarUrl}")` }
@@ -106,7 +106,7 @@ export default function ProfileForm({
           }
         >
           {!avatarUrl && (
-            <div className="flex h-full items-center justify-center text-2xl font-bold text-zinc-400">
+            <div className="flex h-full items-center justify-center text-2xl font-bold text-amber-300">
               {firstName.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -118,7 +118,7 @@ export default function ProfileForm({
             type="file"
             accept="image/*"
             onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
-            className="mt-2 block w-full rounded-lg border border-zinc-300 bg-white p-2 text-sm"
+            className="mt-2 block w-full max-w-full rounded-xl border border-white/20 bg-[#101115] p-2.5 text-sm text-zinc-200 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-2 file:font-bold file:text-zinc-950"
           />
         </label>
       </div>
@@ -129,8 +129,8 @@ export default function ProfileForm({
           value={firstName}
           onChange={(event) => setFirstName(event.target.value)}
           required
-          className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-emerald-600"
-          placeholder="Jihwan"
+          className="mt-2 w-full rounded-xl border border-white/20 bg-[#101115] px-4 py-3 text-white placeholder:text-zinc-500 focus:border-amber-400"
+          placeholder="First name"
         />
       </label>
 
@@ -140,21 +140,21 @@ export default function ProfileForm({
           value={lastName}
           onChange={(event) => setLastName(event.target.value)}
           required
-          className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-emerald-600"
-          placeholder="Kim"
+          className="mt-2 w-full rounded-xl border border-white/20 bg-[#101115] px-4 py-3 text-white placeholder:text-zinc-500 focus:border-amber-400"
+          placeholder="Last name"
         />
       </label>
 
       <button
         type="submit"
         disabled={isSaving}
-        className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="min-h-12 rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSaving ? "Saving..." : "Save profile"}
       </button>
 
       {status && (
-        <p className="rounded-xl bg-zinc-100 p-3 text-sm text-zinc-700">
+        <p role="status" className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-sm text-amber-100">
           {status}
         </p>
       )}
