@@ -75,18 +75,39 @@ export default function ProfileForm({
         nextAvatarUrl = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
       }
 
-      // No email, first name, or last name is ever copied to this public table.
-      const { error: publicError } = await supabase.from("movie_public_profiles").upsert({
-        user_id: userId,
+      // Keep the owner ID immutable. PostgREST upsert can issue an UPDATE
+      // for every submitted column (including user_id); community RLS grants
+      // UPDATE only for handle, bio and avatar_url on purpose.
+      const publicFields = {
         handle: normalizedHandle,
         bio: bio.trim(),
         avatar_url: nextAvatarUrl || null,
-      }, { onConflict: "user_id" });
+      };
+      const { data: existingPublicProfile, error: lookupError } = await supabase
+        .from("movie_public_profiles")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (lookupError) {
+        setStatus(`Could not look up your public profile (${lookupError.code || "unknown"}): ${lookupError.message}`);
+        return;
+      }
+
+      const { error: publicError } = existingPublicProfile
+        ? await supabase
+            .from("movie_public_profiles")
+            .update(publicFields)
+            .eq("user_id", userId)
+        : await supabase
+            .from("movie_public_profiles")
+            .insert({ user_id: userId, ...publicFields });
 
       if (publicError) {
-        setStatus(publicError.code === "23505"
+        const code = publicError.code || "unknown";
+        setStatus(code === "23505"
           ? "That @username is already taken. Please choose another."
-          : "Could not save your public profile. Apply supabase/movie_community.sql in Supabase first.");
+          : `Could not save your public profile (${code}): ${publicError.message}`);
         return;
       }
 
