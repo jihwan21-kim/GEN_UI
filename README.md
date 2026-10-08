@@ -28,7 +28,27 @@ In the **existing** Supabase project, open **SQL Editor** and run:
 
 [`supabase/movie_oneliners.sql`](supabase/movie_oneliners.sql)
 
-The migration creates independent movie tables with RLS, private drafts, public reviews, owner-only voting, atomic publishing, and 10 generation attempts per account per New York calendar day. It also creates a public **`movie-posters`** Storage bucket with owner-specific upload paths and 5MB MIME limits. It optionally seeds six movie titles so the site isn't empty.
+The migration creates independent movie tables with RLS, private drafts, public reviews, owner-only voting, atomic publishing, and 10 generation attempts per account per New York calendar day.
+
+### 1b. Community username, profile, and rankings migration (required for new features)
+
+After the core movie migration, also run [`supabase/movie_community.sql`](supabase/movie_community.sql) in the **same Supabase SQL Editor**. This is additive and does not change existing restaurant data or published movie review text.
+
+It creates `movie_public_profiles` with:
+- A unique lowercase **@username** (3–20 characters, begins with a letter, letters/numbers/underscores).
+- Optional public **bio** (up to 280 characters) and existing profile photo.
+- Row-level security: visitors may read only those public fields; only the account owner can change their public profile.
+- Permission to retrieve the **author's user ID** on an already-public movie review (still no access to its private draft, unpublished alternatives, voter IDs, or the author's email).
+- `movie_author_stats()`: public, aggregate-only creator metrics for creator profiles and the community leaderboard.
+
+The leaderboard has three sorts: **#1 film reviews**, **likes received**, and **published one-liners**. A #1 is a review with a *positive* net score (likes minus dislikes) tied for the highest score on its film. Ties count for each tied review. Generated alternatives that were never published do **not** count toward the published total. If someone has not chosen a public username yet, old published reviews display the fallback label "Film fan" until they complete their public profile.
+
+**Important:** Code deployment does not apply SQL migrations. Run this script manually before testing author links, editing @usernames, /u/[handle] or /leaderboard. If you rerun the core movie SQL after this migration, rerun the community SQL to regrant the safe public author column.
+
+### Display and accessibility
+
+Use the navigation selectors to choose **Dark** or **Light** appearance, and **Standard colors** or the optional **Colorblind-friendly** high-contrast palette. Preferences are stored locally in the browser and carry between movie pages. Voting, selected writing styles, genre filters, and rank entries use words, icons and numeric labels as well as color; the alternate palette is an aid, not a substitute for individual accessibility testing.
+ It also creates a public **`movie-posters`** Storage bucket with owner-specific upload paths and 5MB MIME limits. It optionally seeds six movie titles so the site isn't empty.
 
 **Running GitHub code alone does not apply the SQL migration.** It must be run manually or applied via a proper migrations workflow.
 
@@ -56,6 +76,14 @@ If testing Google login at a new preview domain, add `https://<your-preview-host
 - A second user cannot edit/delete somebody else's movies, see another user's drafts, or vote as them.
 - Test proper handling of Gemini errors/quota (10 attempts per day).
 - Confirm RLS, public accessibility and deployment status from an incognito browser.
+
+### Community feature verification
+
+1. Run both Supabase SQL scripts in order. In `/profile`, create a unique username and bio.
+2. Check `/u/<username>` in an incognito window. The bio and published reviews should show, but **not** your email, legal name, private impressions or other AI suggestions.
+3. Publish from two separate accounts and confirm bylines link to the correct public profiles. An account without a username should show the neutral "Film fan" placeholder.
+4. Vote on reviews and verify published totals, likes and positive-net film-leading reviews on both user profiles and the `/leaderboard` tabs.
+5. Switch between Dark/Light and Standard/Colorblind-friendly. Confirm the movie list, detail overlay, AI editor, login and profile screens use the selected palette and voting state remains visible without relying on color.
 
 ## Privacy and rights
 
