@@ -6,7 +6,10 @@ import { AuthorStats, rankAuthors, rankingModes, RankingSort, readableCount } fr
 
 export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }) {
   const [mode, setMode] = useState<RankingSort>("top_reviews");
-  const ranked = useMemo(() => rankAuthors(authors, mode), [authors, mode]);
+  const ranked = useMemo(
+    () => rankAuthors(authors.filter((author) => Number(author.published_count) > 0), mode),
+    [authors, mode],
+  );
   const active = rankingModes.find((entry) => entry.value === mode)!;
 
   return (
