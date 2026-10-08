@@ -110,8 +110,9 @@ create table if not exists public.movie_review_votes (
 create index if not exists movie_votes_user_idx on public.movie_review_votes(user_id);
 alter table public.movie_review_votes enable row level security;
 revoke all on public.movie_review_votes from anon, authenticated;
-grant select, insert (review_id, user_id, value), update (value), delete
-  on public.movie_review_votes to authenticated;
+grant select, delete on public.movie_review_votes to authenticated;
+grant insert (review_id, user_id, value) on public.movie_review_votes to authenticated;
+grant update (value) on public.movie_review_votes to authenticated;
 drop policy if exists movie_votes_read_own on public.movie_review_votes;
 drop policy if exists movie_votes_insert_own on public.movie_review_votes;
 drop policy if exists movie_votes_update_own on public.movie_review_votes;
