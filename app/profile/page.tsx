@@ -76,7 +76,7 @@ export default async function ProfilePage() {
           href="/"
           className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
         >
-          Back to restaurant list
+          Back to movie collection
         </Link>
       </section>
     </main>
