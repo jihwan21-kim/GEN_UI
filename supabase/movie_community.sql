@@ -85,14 +85,17 @@ as $$
     from leaders l
     group by l.user_id
   )
+  -- Start with the authors of PUBLISHED reviews, not registered public
+  -- profiles, or existing #1 reviews vanish from leaderboards until a user
+  -- creates an @handle. Anonymous creators have NULL handle/bio/avatar.
   select
-    p.user_id, p.handle, p.bio, p.avatar_url,
-    coalesce(t.published_count, 0)::bigint,
-    coalesce(t.likes_received, 0)::bigint,
-    coalesce(t.net_votes, 0)::bigint,
-    coalesce(t.top_reviews, 0)::bigint
-  from public.movie_public_profiles p
-  left join totals t on t.user_id = p.user_id;
+    t.user_id, p.handle, p.bio, p.avatar_url,
+    t.published_count::bigint,
+    t.likes_received::bigint,
+    t.net_votes::bigint,
+    t.top_reviews::bigint
+  from totals t
+  left join public.movie_public_profiles p on p.user_id = t.user_id;
 $$;
 revoke all on function public.movie_author_stats() from public;
 grant execute on function public.movie_author_stats() to anon, authenticated;
