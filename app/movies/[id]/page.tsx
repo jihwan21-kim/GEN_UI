@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Movie, MovieReview, MovieScore, MovieVote } from "@/lib/movies";
