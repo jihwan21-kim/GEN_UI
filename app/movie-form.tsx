@@ -4,6 +4,7 @@ import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Movie, movieGenres } from "@/lib/movies";
+import { useMovieSelection } from "./movie-selection-context";
 
 export default function MovieForm({
   userId,
@@ -13,12 +14,14 @@ export default function MovieForm({
   movie?: Movie;
 }) {
   const router = useRouter();
+  const movieSelection = useMovieSelection();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [refreshing, startTransition] = useTransition();
   const [message, setMessage] = useState("");
   const [genres, setGenres] = useState<string[]>(movie?.genres || []);
   const [fileRights, setFileRights] = useState(false);
+  const [hasPosterFile, setHasPosterFile] = useState(false);
 
   function toggleGenre(genre: string) {
     setGenres((previous) => (
@@ -82,7 +85,7 @@ export default function MovieForm({
       const query = movie
         ? db.from("movies").update(fields).eq("id", movie.id).eq("created_by", userId)
         : db.from("movies").insert({ ...fields, created_by: userId });
-      const { data: saved, error } = await query.select("id").single();
+      const { data: saved, error } = await query.select("id, title, release_year, genres, poster_path, created_by, created_at").single();
       if (error || !saved) {
         if (uploadedPath) await db.storage.from("movie-posters").remove([uploadedPath]);
         setMessage(error?.code === "23505"
@@ -97,9 +100,17 @@ export default function MovieForm({
         form.reset();
         setGenres([]);
         setFileRights(false);
+        setHasPosterFile(false);
       }
       setOpen(false);
-      setMessage(movie ? "Movie updated." : "Movie added.");
+      if (movie) {
+        setMessage("Movie updated.");
+      } else {
+        // Open the newly created film in-place instead of leaving a permanent
+        // `Movie added.` message beneath the homepage button.
+        setMessage("");
+        movieSelection?.movieCreated(saved as Movie);
+      }
       startTransition(() => router.refresh());
     } catch {
       setMessage("Could not contact Supabase. Please try again.");
@@ -125,7 +136,8 @@ export default function MovieForm({
         await db.storage.from("movie-posters").remove([movie.poster_path]);
       }
       setOpen(false);
-      if (movie) router.push("/");
+      if (movieSelection) movieSelection.movieDeleted(movie.id);
+      else router.push("/");
       startTransition(() => router.refresh());
     } catch {
       setMessage("Could not delete this movie. Please try again.");
@@ -140,7 +152,7 @@ export default function MovieForm({
         <button
           type="button"
           aria-expanded={open}
-          onClick={() => setOpen((previous) => !previous)}
+          onClick={() => { setMessage(""); setOpen((previous) => !previous); }}
           disabled={busy || refreshing}
           className="inline-flex min-h-12 min-w-[180px] items-center justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
         >
@@ -205,14 +217,20 @@ export default function MovieForm({
           <label className="grid gap-1 text-sm font-semibold">
             Artwork <span className="font-normal text-zinc-500">(optional, max 5 MB)</span>
             <input name="poster" type="file" accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => { if (!event.target.files?.length) setFileRights(false); }}
+              onChange={(event) => {
+                setHasPosterFile(Boolean(event.target.files?.[0]?.size));
+                setFileRights(false);
+              }}
               className="rounded-lg border border-zinc-300 bg-white p-2.5 text-sm font-normal" />
           </label>
-          <label className="flex items-start gap-2 text-xs leading-relaxed text-zinc-600">
-            <input type="checkbox" checked={fileRights} onChange={(event) => setFileRights(event.target.checked)}
-              className="mt-0.5" />
-            I own or have permission to upload the artwork. Movie posters are often copyrighted.
-          </label>
+          {hasPosterFile && (
+            <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-relaxed text-zinc-700">
+              <input type="checkbox" checked={fileRights} onChange={(event) => setFileRights(event.target.checked)}
+                required
+                className="mt-0.5" />
+              I own or have permission to upload this artwork. Movie posters are often copyrighted.
+            </label>
+          )}
           {movie?.poster_path && (
             <label className="flex gap-2 text-sm text-zinc-600">
               <input type="checkbox" name="remove_poster" /> Remove existing artwork
