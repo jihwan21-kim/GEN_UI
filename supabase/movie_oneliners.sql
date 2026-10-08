@@ -18,9 +18,8 @@ create table if not exists public.movies (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   constraint movie_poster_owner_path check (
-    poster_path is null or (
-      created_by is not null
-      and poster_path like created_by::text || '/%'
+    poster_path is null or created_by is null or (
+      poster_path like created_by::text || '/%'
       and char_length(poster_path) <= 220
     )
   )
