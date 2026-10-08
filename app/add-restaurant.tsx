@@ -30,8 +30,23 @@ export default function AddRestaurant({
         .eq("id", restaurant.id)
         .eq("created_by", userId)
         .select("id");
-      if (error || !deleted?.length) {
-        setMessage("Could not delete this restaurant. You can only delete restaurants you created.");
+      if (error) {
+        console.error("Restaurant deletion failed", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+        });
+        setMessage(
+          error.code === "23503"
+            ? "This restaurant has linked captions or votes. Database relationships currently prevent deletion."
+            : `Could not delete restaurant (${error.code || "unknown error"}): ${error.message}`,
+        );
+        return;
+      }
+      if (!deleted?.length) {
+        setMessage(
+          "No restaurant was deleted. Check that this restaurant's created_by matches your signed-in account and that your session is current.",
+        );
         return;
       }
       setOpen(false);
