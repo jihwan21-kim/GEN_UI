@@ -105,7 +105,7 @@ html[data-cinema-theme="light"][data-cinema-vision="accessible"] {
   border: 1px solid var(--cinema-border);
 }
 .cinema-separator { border-color: var(--cinema-border); }
-.cinema-app a:not([class*="hover:"]):hover { text-decoration: underline; }
+/* Underlines are opt-in per text link; the brand and button-style links stay clean on hover. */
 .cinema-app :is(button, a, input, textarea, select):focus-visible {
   outline: 3px solid var(--cinema-accent);
   outline-offset: 3px;
