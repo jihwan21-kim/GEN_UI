@@ -17,6 +17,7 @@ export default function MovieReviews({
   userId,
   loadError,
   variant = "full",
+  onOpenDetails,
 }: {
   movie: Movie;
   reviews: MovieReview[];
@@ -25,6 +26,7 @@ export default function MovieReviews({
   userId: string | null;
   loadError: boolean;
   variant?: "preview" | "full";
+  onOpenDetails?: () => void;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
@@ -150,12 +152,17 @@ export default function MovieReviews({
         </button>
       )}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {variant === "preview" && (
+        {variant === "preview" && (onOpenDetails ? (
+          <button type="button" onClick={onOpenDetails}
+            className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-center text-sm font-bold text-zinc-800 hover:border-amber-300 hover:bg-amber-50">
+            View all reviews →
+          </button>
+        ) : (
           <Link href={`/movies/${movie.id}`}
             className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-center text-sm font-bold text-zinc-800 hover:border-amber-300 hover:bg-amber-50">
             View all reviews →
           </Link>
-        )}
+        ))}
         {!loadError && (userId ? (
           <MovieReviewComposer movie={movie} />
         ) : (
