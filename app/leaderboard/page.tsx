@@ -31,7 +31,7 @@ export default async function LeaderboardPage() {
             <span className="mt-2 block text-xs">{error}</span>
           </div>
         ) : (
-          <LeaderboardBoard authors={authors} />
+          <LeaderboardBoard authors={authors} viewerId={user?.id ?? null} />
         )}
         <Link href="/" className="cinema-accent-text mt-9 inline-block text-sm font-bold hover:underline">← Back to movies</Link>
       </div>
