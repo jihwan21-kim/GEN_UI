@@ -181,6 +181,7 @@ export default function RestaurantCaptions({
       ) : shown.length === 0 ? (
         <p className="mt-3 text-sm text-zinc-500">No AI captions yet.</p>
       ) : (
+        <>
         <div className="mt-4 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-zinc-800">AI Captions <span className="font-normal text-zinc-500">({ranked.length})</span></h3>
           <span className="text-xs text-zinc-500">Most liked first</span>
@@ -225,6 +226,7 @@ export default function RestaurantCaptions({
             );
           })}
         </ul>
+        </>
       )}
       {!loadError && ranked.length > 2 && (
         <button
