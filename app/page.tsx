@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews } from "@/lib/movies";
 import MovieDirectory from "./movie-directory";
 import MovieForm from "./movie-form";
+import { MovieSelectionProvider } from "./movie-selection-context";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[#101115] pb-20 text-white">
+      <MovieSelectionProvider>
       <div className="mx-auto max-w-7xl px-5 pt-7 sm:px-8 sm:pt-10">
         <nav aria-label="Main navigation" className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="inline-flex items-center gap-3 text-base font-black tracking-tight text-white sm:text-lg">
@@ -141,6 +143,7 @@ export default async function Home() {
           Community artwork must be used with permission.
         </footer>
       </div>
+      </MovieSelectionProvider>
     </main>
   );
 }
