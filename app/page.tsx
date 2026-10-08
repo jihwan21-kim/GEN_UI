@@ -83,7 +83,7 @@ export default async function Home() {
               three sharp one-liners. Pick one, publish, and let the audience vote.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <a href="#movie-collection-title" className="rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300">
+              <a href="#movie-collection-title" className="inline-flex min-h-12 min-w-[180px] items-center justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300">
                 Explore films ↓
               </a>
               {user ? <MovieForm userId={user.id} /> : (
