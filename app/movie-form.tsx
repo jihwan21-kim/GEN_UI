@@ -168,9 +168,20 @@ export default function MovieForm({
           </label>
           <label className="grid gap-1 text-sm font-semibold">
             Release year
-            <input name="release_year" type="number" min={1888} max={new Date().getFullYear() + 3}
-              defaultValue={movie?.release_year || ""} required placeholder="2014"
-              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal" />
+            <select
+              name="release_year"
+              defaultValue={movie ? String(movie.release_year) : ""}
+              required
+              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal"
+            >
+              <option value="" disabled>Select release year</option>
+              {Array.from(
+                { length: new Date().getFullYear() + 3 - 1888 + 1 },
+                (_, index) => new Date().getFullYear() + 3 - index,
+              ).map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
           </label>
           <fieldset>
             <legend className="text-sm font-semibold">Genres <span className="font-normal text-zinc-500">(choose 1–3)</span></legend>
