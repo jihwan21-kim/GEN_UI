@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AuthorStats, rankAuthors, readableCount } from "@/lib/community";
+import { rankAuthors, readableCount } from "@/lib/community";
+import { loadCommunityRankings } from "@/lib/community-server";
 import CinemaNavigation from "../cinema-navigation";
 import ProfileForm from "./profile-form";
 
@@ -21,12 +22,12 @@ export default async function ProfilePage() {
       .select("user_id, handle, bio, avatar_url")
       .eq("user_id", user.id)
       .maybeSingle(),
-    supabase.rpc("movie_author_stats"),
+    loadCommunityRankings(supabase),
   ]);
 
   const profile = profileResult.data;
   const publicProfile = publicProfileResult.data;
-  const rankings = (rankingResult.data || []) as AuthorStats[];
+  const rankings = rankingResult.authors;
   const stats = rankings.find((entry) => entry.user_id === user.id);
   const position = stats && Number(stats.published_count) > 0
     ? rankAuthors(rankings.filter((entry) => Number(entry.published_count) > 0), "top_reviews")
@@ -52,8 +53,9 @@ export default async function ProfilePage() {
 
           {communityNotReady && (
             <p role="alert" className="cinema-status mt-6 rounded-xl p-4 text-sm">
-              Community setup needed: run <code>supabase/movie_community.sql</code> in your
-              Supabase SQL Editor to enable usernames, public profiles and rankings.
+              Community database could not load. Check the movie community migration or permissions.
+              {rankingResult.error && <span className="mt-2 block text-xs">{rankingResult.error}</span>}
+              {publicProfileResult.error && <span className="mt-2 block text-xs">{publicProfileResult.error.message}</span>}
             </p>
           )}
           {needsProfile && (
@@ -72,14 +74,14 @@ export default async function ProfilePage() {
               <div key={item.label} className="cinema-card rounded-2xl border p-4">
                 <span aria-hidden="true" className="cinema-accent-text text-lg">{item.icon}</span>
                 <p className="mt-2 text-2xl font-black">{item.rank && item.value ? "#" : ""}
-                  {item.value == null ? "—" : readableCount(item.value)}
+                  {item.value == null ? (item.rank ? "Unranked" : "0") : readableCount(item.value)}
                 </p>
                 <p className="cinema-muted mt-1 text-xs">{item.label}</p>
               </div>
             ))}
           </div>
           <p className="cinema-muted mt-2 text-xs">
-            Counts include published reviews only. A #1 review has the highest positive net vote score for its movie; ties count.
+            Counts include published reviews only, even if you have not created a public username. A #1 review has the highest positive net vote score for its movie; ties count.
           </p>
 
           <div className="cinema-card mt-8 rounded-3xl border p-5 shadow-xl sm:p-8">
