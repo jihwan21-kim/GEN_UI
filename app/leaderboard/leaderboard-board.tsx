@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AuthorStats, rankAuthors, rankingModes, RankingSort, readableCount } from "@/lib/community";
 
-export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }) {
+export default function LeaderboardBoard({ authors, viewerId }: { authors: AuthorStats[]; viewerId?: string | null }) {
   const [mode, setMode] = useState<RankingSort>("top_reviews");
   const ranked = useMemo(() => rankAuthors(authors, mode), [authors, mode]);
   const active = rankingModes.find((entry) => entry.value === mode)!;
@@ -30,7 +30,7 @@ export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }
       {ranked.length ? (
         <ol className="mt-6 grid gap-3">
           {ranked.map((author, index) => (
-            <li key={author.user_id} className="cinema-card flex flex-wrap items-center gap-4 rounded-2xl border p-4 sm:p-5">
+            <li key={author.user_id} className={`cinema-card flex flex-wrap items-center gap-4 rounded-2xl border p-4 sm:p-5 ${viewerId === author.user_id ? "ring-2 ring-[var(--cinema-accent)]" : ""}`}>
               <div className="cinema-accent-text w-9 shrink-0 text-center text-xl font-black" aria-label={`Rank ${index + 1}`}>
                 {index + 1}
               </div>
@@ -44,6 +44,9 @@ export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }
                 </div>
               )}
               <div className="min-w-0 flex-1">
+                {viewerId === author.user_id && (
+                  <span className="cinema-accent-bg mb-1 ml-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold">You</span>
+                )}
                 {author.handle ? (
                   <Link href={`/u/${author.handle}`} className="cinema-accent-text break-all text-base font-bold hover:underline">
                     @{author.handle}
