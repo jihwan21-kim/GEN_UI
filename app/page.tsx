@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews } from "@/lib/movies";
 import MovieDirectory from "./movie-directory";
 import MovieForm from "./movie-form";
+import MovieSpotlightLink from "./movie-spotlight-link";
 import { MovieSelectionProvider } from "./movie-selection-context";
 
 export const dynamic = "force-dynamic";
@@ -84,8 +85,8 @@ export default async function Home() {
               Write what a movie made you feel. Let AI shape your impression into
               three sharp one-liners. Pick one, publish, and let the audience vote.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <a href="#movie-collection-title" className="inline-flex min-h-12 min-w-[180px] items-center justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300">
+            <div className="mt-7 flex flex-wrap items-start gap-3">
+              <a href="#movie-collection-title" className="inline-flex h-12 w-[180px] items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-bold text-zinc-950 hover:bg-amber-300">
                 Explore films ↓
               </a>
               {user ? <MovieForm userId={user.id} /> : (
@@ -113,9 +114,7 @@ export default async function Home() {
               <span>{topMovie.title} ({topMovie.release_year})</span>
               <span>·</span>
               <span>{topThisWeek.tone}</span>
-              <Link href={`/movies/${topMovie.id}`} className="font-bold text-amber-300 hover:underline">
-                Explore reviews →
-              </Link>
+              <MovieSpotlightLink movieId={topMovie.id} />
             </div>
           </section>
         )}
