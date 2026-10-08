@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Movie, MovieReview, MovieScore, MovieVote } from "@/lib/movies";
 import MoviePoster from "./movie-poster";
 import MovieReviews from "./movie-reviews";
+import MovieDetailOverlay from "./movie-detail-overlay";
 
 export default function MovieDirectory({
   movies, reviews, scores, votes, userId, loadError,
@@ -19,6 +19,9 @@ export default function MovieDirectory({
   const [search, setSearch] = useState("");
   const [genre, setGenre] = useState("All");
   const [sort, setSort] = useState<"title" | "year">("title");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const closeDetails = useCallback(() => setSelectedId(null), []);
+  const selectedMovie = movies.find((movie) => movie.id === selectedId);
   const genres = useMemo(
     () => ["All", ...Array.from(new Set(movies.flatMap((movie) => movie.genres))).sort()],
     [movies],
@@ -89,17 +92,18 @@ export default function MovieDirectory({
             <li id={`movie-${movie.id}`} key={movie.id}
               className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl shadow-black/10">
               <div className="flex gap-4">
-                <Link href={`/movies/${movie.id}`} className="w-[38%] shrink-0 self-start">
+                <button type="button" onClick={() => setSelectedId(movie.id)} aria-label={`View details for ${movie.title}`}
+                  className="w-[38%] shrink-0 self-start rounded-xl text-left focus-visible:outline-amber-500">
                   <MoviePoster movie={movie} className="shadow-md" />
-                </Link>
+                </button>
                 <div className="min-w-0 flex-1 py-1">
                   <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
                     {movie.release_year}
                   </p>
-                  <Link href={`/movies/${movie.id}`}
-                    className="mt-2 block break-words text-lg font-bold leading-tight tracking-tight text-zinc-900 hover:text-amber-700 hover:underline sm:text-xl">
+                  <button type="button" onClick={() => setSelectedId(movie.id)}
+                    className="mt-2 block break-words text-left text-lg font-bold leading-tight tracking-tight text-zinc-900 hover:text-amber-700 hover:underline sm:text-xl">
                     {movie.title}
-                  </Link>
+                  </button>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {movie.genres.map((value) => (
                       <span key={value} className="rounded-full bg-zinc-100 px-2 py-1 text-[11px] font-semibold text-zinc-600">
@@ -115,6 +119,7 @@ export default function MovieDirectory({
               <div className="mt-auto border-t border-zinc-100 pt-4">
                 <MovieReviews
                   variant="preview"
+                  onOpenDetails={() => setSelectedId(movie.id)}
                   movie={movie}
                   reviews={reviews.filter((review) => Number(review.movie_id) === Number(movie.id))}
                   scores={scores}
@@ -139,6 +144,18 @@ export default function MovieDirectory({
             </button>
           )}
         </div>
+      )}
+      {selectedMovie && (
+        <MovieDetailOverlay
+          key={selectedMovie.id}
+          movie={selectedMovie}
+          reviews={reviews.filter((review) => Number(review.movie_id) === Number(selectedMovie.id))}
+          scores={scores}
+          votes={votes}
+          userId={userId}
+          loadError={loadError}
+          onClose={closeDetails}
+        />
       )}
     </section>
   );
