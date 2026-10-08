@@ -10,7 +10,7 @@ export default function MovieSpotlightLink({ movieId }: { movieId: number }) {
       type="button"
       onClick={() => showMovie(movieId)}
       aria-label="Explore reviews for the spotlight movie"
-      className="font-bold text-amber-300 hover:text-amber-200 hover:underline"
+      className="cinema-accent-text font-bold hover:underline"
     >
       Explore reviews →
     </button>
