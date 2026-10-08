@@ -90,7 +90,7 @@ export default async function Home() {
                 Explore films ↓
               </a>
               {user ? <MovieForm userId={user.id} /> : (
-                <Link href="/login" className="rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white hover:bg-white/10">
+                <Link href="/login" className="inline-flex h-12 w-[180px] items-center justify-center rounded-xl border border-amber-400 px-5 text-sm font-bold text-amber-300 transition-colors hover:bg-amber-400 hover:text-zinc-950">
                   Sign in to write
                 </Link>
               )}
