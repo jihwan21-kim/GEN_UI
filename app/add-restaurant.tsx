@@ -167,8 +167,7 @@ export default function AddRestaurant({
             </label>
           )}
           <p className="text-xs text-zinc-500">
-            Your submission will be public. Upload a photo you have permission
-            to share. JPG, PNG or WebP, up to 5 MB.
+            Your submission will be public. Share a photo you took yourself, like a real dish or storefront, rather than a generic stock image. Only upload photos you have permission to share. JPG, PNG or WebP, up to 5 MB.
           </p>
           <button
             disabled={busy || refreshing}
