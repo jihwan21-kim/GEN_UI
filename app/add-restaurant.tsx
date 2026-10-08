@@ -17,6 +17,31 @@ export default function AddRestaurant({
   const [busy, setBusy] = useState(false);
   const [refreshing, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+  async function deleteRestaurant() {
+    if (!restaurant || busy || refreshing) return;
+    if (!window.confirm(`Delete "${restaurant.name}"? This cannot be undone and may also remove associated captions and votes.`)) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data: deleted, error } = await db
+        .from("restaurants")
+        .delete()
+        .eq("id", restaurant.id)
+        .eq("created_by", userId)
+        .select("id");
+      if (error || !deleted?.length) {
+        setMessage("Could not delete this restaurant. You can only delete restaurants you created.");
+        return;
+      }
+      setOpen(false);
+      startTransition(() => router.refresh());
+    } catch {
+      setMessage("Couldn't reach the server. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -85,7 +110,9 @@ export default function AddRestaurant({
   const field = "mt-1 w-full rounded-lg border border-zinc-300 bg-white p-2.5";
   return (
     <div className={restaurant ? "mt-3" : "mt-6 max-w-2xl"}>
+      <div className="flex flex-wrap items-center gap-2">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-controls={
@@ -100,6 +127,17 @@ export default function AddRestaurant({
             ? "Edit restaurant"
             : "+ Add a restaurant"}
       </button>
+      {restaurant && (
+        <button
+          type="button"
+          onClick={deleteRestaurant}
+          disabled={!available || busy || refreshing}
+          className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+        >
+          {busy ? "Working…" : "Delete restaurant"}
+        </button>
+      )}
+      </div>
       {!available && (
         <p className="mt-2 text-sm text-zinc-500">
           Restaurant submissions will be available after the database update.
