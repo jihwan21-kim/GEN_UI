@@ -113,6 +113,14 @@ export default async function Home() {
           </section>
         )}
 
+        {!moviesResult.error && authorsResult.error && (
+          <section role="status" className="cinema-status mt-8 rounded-xl p-4 text-sm">
+            Creator profiles and rankings need one more setup step. Run
+            <code className="mx-1 font-semibold">supabase/movie_community.sql</code>
+            in Supabase SQL Editor to enable public @usernames and leaderboard scores.
+          </section>
+        )}
+
         {moviesResult.error ? (
           <section role="alert" className="cinema-status mt-10 rounded-2xl border p-6">
             <h2 className="text-xl font-bold">Movie database setup needed</h2>
