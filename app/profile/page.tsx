@@ -28,8 +28,9 @@ export default async function ProfilePage() {
   const publicProfile = publicProfileResult.data;
   const rankings = (rankingResult.data || []) as AuthorStats[];
   const stats = rankings.find((entry) => entry.user_id === user.id);
-  const position = stats
-    ? rankAuthors(rankings, "top_reviews").findIndex((entry) => entry.user_id === user.id) + 1
+  const position = stats && Number(stats.published_count) > 0
+    ? rankAuthors(rankings.filter((entry) => Number(entry.published_count) > 0), "top_reviews")
+        .findIndex((entry) => entry.user_id === user.id) + 1
     : null;
   const needsProfile = !profile?.first_name?.trim() || !profile?.last_name?.trim();
   const communityNotReady = Boolean(publicProfileResult.error || rankingResult.error);
