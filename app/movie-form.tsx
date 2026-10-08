@@ -154,7 +154,7 @@ export default function MovieForm({
           aria-expanded={open}
           onClick={() => { setMessage(""); setOpen((previous) => !previous); }}
           disabled={busy || refreshing}
-          className="inline-flex min-h-12 min-w-[180px] items-center justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
+          className="inline-flex h-12 w-[180px] shrink-0 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
         >
           {open ? "Close form" : movie ? "Edit movie" : "+ Add a movie"}
         </button>
@@ -245,7 +245,11 @@ export default function MovieForm({
           </button>
         </form>
       )}
-      <p role="status" aria-live="polite" className="mt-2 text-sm text-amber-700">{message}</p>
+      {message && (
+        <p role="status" aria-live="polite" className={movie ? "mt-2 text-sm text-amber-700" : "mt-2 text-sm text-amber-200"}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }
