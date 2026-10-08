@@ -69,7 +69,7 @@ export function CinemaDisplaySettings() {
         className="cinema-display-select rounded-lg px-2.5 py-2 text-xs font-semibold"
       >
         <option value="standard">Standard colors</option>
-        <option value="accessible">◉ Color-friendly</option>
+        <option value="accessible">◉ Colorblind-friendly</option>
       </select>
     </div>
   );
