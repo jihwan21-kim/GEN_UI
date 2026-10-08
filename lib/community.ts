@@ -5,7 +5,13 @@ export type PublicAuthor = {
   avatar_url: string | null;
 };
 
-export type AuthorStats = PublicAuthor & {
+// Rankings include people who have published reviews but have not set up a
+// public creator profile. Such authors have no public handle or bio yet.
+export type AuthorStats = {
+  user_id: string;
+  handle: string | null;
+  bio: string | null;
+  avatar_url: string | null;
   published_count: number;
   likes_received: number;
   net_votes: number;
@@ -31,5 +37,6 @@ export function rankAuthors(authors: AuthorStats[], mode: RankingSort) {
   return [...authors].sort((a, b) =>
     Number(b[mode] || 0) - Number(a[mode] || 0)
     || Number(b.net_votes || 0) - Number(a.net_votes || 0)
-    || a.handle.localeCompare(b.handle));
+    || (a.handle || "").localeCompare(b.handle || "")
+    || a.user_id.localeCompare(b.user_id));
 }
