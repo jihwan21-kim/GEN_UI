@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { AuthorStats } from "@/lib/community";
+import { loadCommunityRankings } from "@/lib/community-server";
 import CinemaNavigation from "../cinema-navigation";
 import LeaderboardBoard from "./leaderboard-board";
 
@@ -8,11 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
-  const [{ data: { user } }, { data, error }] = await Promise.all([
+  const [{ data: { user } }, { authors, error }] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.rpc("movie_author_stats"),
+    loadCommunityRankings(supabase),
   ]);
-  const authors = (data || []) as AuthorStats[];
 
   return (
     <main className="cinema-app cinema-page px-5 py-8 pb-20 sm:px-8 sm:py-12">
@@ -28,7 +27,8 @@ export default async function LeaderboardPage() {
         </header>
         {error ? (
           <div role="alert" className="cinema-status mt-8 rounded-xl p-5">
-            To enable the rankings, run <code>supabase/movie_community.sql</code> in your Supabase SQL Editor first.
+            Could not load community rankings. Please verify the movie community migration and database permissions.
+            <span className="mt-2 block text-xs">{error}</span>
           </div>
         ) : (
           <LeaderboardBoard authors={authors} />
