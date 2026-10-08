@@ -34,15 +34,15 @@ export default function LoginPage() {
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight">Sign in</h1>
         <p className="mt-3 text-zinc-600">
-          Use Google to sign in. After your first login, you will be asked to
-          complete your profile.
+          Use Google to sign in and return to the restaurant list. You can edit
+          your profile at any time.
         </p>
 
         <button
           type="button"
           onClick={signInWithGoogle}
           disabled={isLoading}
-          className="mt-8 w-full rounded-xl bg-zinc-900 px-5 py-3 font-semibold text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-8 w-full rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Redirecting to Google..." : "Continue with Google"}
         </button>

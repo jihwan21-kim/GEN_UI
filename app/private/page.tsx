@@ -21,15 +21,15 @@ export default async function PrivatePage() {
     .maybeSingle();
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-16 text-white">
+    <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
       <section className="mx-auto max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
+        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
           Protected route
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight">
           Private Member Area
         </h1>
-        <p className="mt-4 text-zinc-300">
+        <p className="mt-4 text-zinc-600">
           Welcome{profile?.first_name ? `, ${profile.first_name}` : ""}. This
           page is only rendered for signed-in users.
         </p>
@@ -37,20 +37,20 @@ export default async function PrivatePage() {
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
             href="/profile"
-            className="rounded-xl bg-white px-5 py-3 font-semibold text-zinc-900"
+            className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white"
           >
             Edit profile
           </Link>
           <Link
             href="/"
-            className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white"
+            className="rounded-xl border border-zinc-300 bg-white px-5 py-3 font-semibold text-zinc-900"
           >
             Restaurant list
           </Link>
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="rounded-xl border border-zinc-700 px-5 py-3 font-semibold text-white"
+              className="rounded-xl border border-zinc-300 bg-white px-5 py-3 font-semibold text-zinc-900"
             >
               Sign out
             </button>
