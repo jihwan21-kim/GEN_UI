@@ -10,7 +10,7 @@ This is the **`feature/movie-one-liners`** branch. The existing restaurant assig
 
 ## Workflow
 
-1. Browse movies, search titles/year, and filter by genre.
+1. Browse movies, search titles/year, and filter by genre. Click anywhere in a movie card, its poster/title, or **View all reviews** to open an accessible movie-detail overlay without leaving the page. Click outside, press Escape or the × button to close; browser deep links to `/movies/[id]` also remain available.
 2. Authenticated users add movies (title, year, 1–3 genres, optional licensed/original artwork). Only the original creator may edit or delete a movie.
 3. Select a movie and **write your own impressions** (20–5,000 characters).
 4. Pick **Witty / Serious / Poetic / Sarcastic** and whether the result must be spoiler-free (on by default).
