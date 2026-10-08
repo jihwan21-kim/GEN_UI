@@ -154,7 +154,7 @@ export default function MovieForm({
           aria-expanded={open}
           onClick={() => { setMessage(""); setOpen((previous) => !previous); }}
           disabled={busy || refreshing}
-          className="inline-flex h-12 w-[180px] shrink-0 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
+          className="cinema-accent-bg inline-flex h-12 w-[180px] shrink-0 items-center justify-center rounded-xl px-5 text-sm font-bold disabled:opacity-50"
         >
           {open ? "Close form" : movie ? "Edit movie" : "+ Add a movie"}
         </button>
@@ -163,20 +163,20 @@ export default function MovieForm({
             type="button"
             disabled={busy || refreshing}
             onClick={deleteMovie}
-            className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+            className="cinema-outline rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
           >
             Delete movie
           </button>
         )}
       </div>
       {open && (
-        <form onSubmit={submit} className="mt-4 grid gap-4 rounded-2xl border border-zinc-200 bg-white p-5 text-zinc-900 shadow-sm">
+        <form onSubmit={submit} className="cinema-card mt-4 grid gap-4 rounded-2xl border p-5 shadow-sm">
           <h2 className="text-lg font-bold">{movie ? "Edit your movie" : "Add a movie to the collection"}</h2>
           <label className="grid gap-1 text-sm font-semibold">
             Film title
             <input name="title" defaultValue={movie?.title || ""} required maxLength={120}
               placeholder="e.g. Interstellar"
-              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal" />
+              className="cinema-input rounded-lg p-3 font-normal" />
           </label>
           <label className="grid gap-1 text-sm font-semibold">
             Release year
@@ -184,7 +184,7 @@ export default function MovieForm({
               name="release_year"
               defaultValue={movie ? String(movie.release_year) : ""}
               required
-              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal"
+              className="cinema-input rounded-lg p-3 font-normal"
             >
               <option value="" disabled>Select release year</option>
               {Array.from(
@@ -196,12 +196,12 @@ export default function MovieForm({
             </select>
           </label>
           <fieldset>
-            <legend className="text-sm font-semibold">Genres <span className="font-normal text-zinc-500">(choose 1–3)</span></legend>
+            <legend className="text-sm font-semibold">Genres <span className="cinema-muted font-normal">(choose 1–3)</span></legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {movieGenres.map((genre) => (
                 <label key={genre} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${genres.includes(genre)
-                  ? "border-amber-500 bg-amber-100 text-zinc-950"
-                  : "border-zinc-200 bg-zinc-50 text-zinc-600"}`}>
+                  ? "cinema-accent-bg"
+                  : "cinema-muted-card"}`}>
                   <input
                     type="checkbox"
                     checked={genres.includes(genre)}
@@ -209,22 +209,22 @@ export default function MovieForm({
                     onChange={() => toggleGenre(genre)}
                     className="sr-only"
                   />
-                  {genre}
+                  {genres.includes(genre) ? "✓ " : ""}{genre}
                 </label>
               ))}
             </div>
           </fieldset>
           <label className="grid gap-1 text-sm font-semibold">
-            Artwork <span className="font-normal text-zinc-500">(optional, max 5 MB)</span>
+            Artwork <span className="cinema-muted font-normal">(optional, max 5 MB)</span>
             <input name="poster" type="file" accept="image/jpeg,image/png,image/webp"
               onChange={(event) => {
                 setHasPosterFile(Boolean(event.target.files?.[0]?.size));
                 setFileRights(false);
               }}
-              className="rounded-lg border border-zinc-300 bg-white p-2.5 text-sm font-normal" />
+              className="cinema-input rounded-lg p-2.5 text-sm font-normal" />
           </label>
           {hasPosterFile && (
-            <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-relaxed text-zinc-700">
+            <label className="cinema-status flex items-start gap-2 rounded-lg p-3 text-xs leading-relaxed">
               <input type="checkbox" checked={fileRights} onChange={(event) => setFileRights(event.target.checked)}
                 required
                 className="mt-0.5" />
@@ -232,21 +232,21 @@ export default function MovieForm({
             </label>
           )}
           {movie?.poster_path && (
-            <label className="flex gap-2 text-sm text-zinc-600">
+            <label className="cinema-muted flex gap-2 text-sm">
               <input type="checkbox" name="remove_poster" /> Remove existing artwork
             </label>
           )}
-          <p className="text-xs text-zinc-500">
+          <p className="cinema-muted text-xs">
             A custom title card will appear when no artwork is uploaded. Movie details and approved artwork will be public.
           </p>
           <button type="submit" disabled={busy || refreshing}
-            className="rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white hover:bg-zinc-800 disabled:opacity-50">
+            className="cinema-accent-bg rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50">
             {busy ? "Saving…" : movie ? "Save changes" : "Add movie"}
           </button>
         </form>
       )}
       {message && (
-        <p role="status" aria-live="polite" className={movie ? "mt-2 text-sm text-amber-700" : "mt-2 text-sm text-amber-200"}>
+        <p role="status" aria-live="polite" className="cinema-status mt-2 rounded-lg p-2 text-sm">
           {message}
         </p>
       )}
