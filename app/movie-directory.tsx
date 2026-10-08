@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Movie, MovieReview, MovieScore, MovieVote } from "@/lib/movies";
 import MoviePoster from "./movie-poster";
 import MovieReviews from "./movie-reviews";
 import MovieDetailOverlay from "./movie-detail-overlay";
+import { useRequiredMovieSelection } from "./movie-selection-context";
 
 export default function MovieDirectory({
   movies, reviews, scores, votes, userId, loadError,
@@ -19,16 +20,22 @@ export default function MovieDirectory({
   const [search, setSearch] = useState("");
   const [genre, setGenre] = useState("All");
   const [sort, setSort] = useState<"title" | "year">("title");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const closeDetails = useCallback(() => setSelectedId(null), []);
-  const selectedMovie = movies.find((movie) => movie.id === selectedId);
+  const { newlyAddedMovie, openMovieId, showMovie, closeMovie } = useRequiredMovieSelection();
+  // Keep the new movie available instantly before router.refresh returns.
+  const allMovies = useMemo(
+    () => newlyAddedMovie && !movies.some((movie) => movie.id === newlyAddedMovie.id)
+      ? [newlyAddedMovie, ...movies]
+      : movies,
+    [movies, newlyAddedMovie],
+  );
+  const selectedMovie = allMovies.find((movie) => movie.id === openMovieId);
   const genres = useMemo(
-    () => ["All", ...Array.from(new Set(movies.flatMap((movie) => movie.genres))).sort()],
-    [movies],
+    () => ["All", ...Array.from(new Set(allMovies.flatMap((movie) => movie.genres))).sort()],
+    [allMovies],
   );
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
-    return movies
+    return allMovies
       .filter((movie) =>
         (genre === "All" || movie.genres.includes(genre)) &&
         (!query || movie.title.toLocaleLowerCase().includes(query) ||
@@ -38,7 +45,7 @@ export default function MovieDirectory({
       .sort((a, b) => sort === "title"
         ? a.title.localeCompare(b.title)
         : b.release_year - a.release_year || a.title.localeCompare(b.title));
-  }, [movies, search, genre, sort]);
+  }, [allMovies, search, genre, sort]);
 
   return (
     <section aria-labelledby="movie-collection-title" className="mt-12">
@@ -93,12 +100,12 @@ export default function MovieDirectory({
               onClick={(event) => {
                 const target = event.target as HTMLElement;
                 if (!target.closest("button, a, input, textarea, select, label")) {
-                  setSelectedId(movie.id);
+                  showMovie(movie.id);
                 }
               }}
               className="flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl shadow-black/10 transition-shadow hover:shadow-2xl hover:shadow-black/25">
               <div className="flex gap-4">
-                <button type="button" onClick={() => setSelectedId(movie.id)} aria-label={`View details for ${movie.title}`}
+                <button type="button" onClick={() => showMovie(movie.id)} aria-label={`View details for ${movie.title}`}
                   className="w-[38%] shrink-0 self-start rounded-xl text-left focus-visible:outline-amber-500">
                   <MoviePoster movie={movie} className="shadow-md" />
                 </button>
@@ -106,7 +113,7 @@ export default function MovieDirectory({
                   <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
                     {movie.release_year}
                   </p>
-                  <button type="button" onClick={() => setSelectedId(movie.id)}
+                  <button type="button" onClick={() => showMovie(movie.id)}
                     className="mt-2 block break-words text-left text-lg font-bold leading-tight tracking-tight text-zinc-900 hover:text-amber-700 hover:underline sm:text-xl">
                     {movie.title}
                   </button>
@@ -125,7 +132,7 @@ export default function MovieDirectory({
               <div className="mt-auto border-t border-zinc-100 pt-4">
                 <MovieReviews
                   variant="preview"
-                  onOpenDetails={() => setSelectedId(movie.id)}
+                  onOpenDetails={() => showMovie(movie.id)}
                   movie={movie}
                   reviews={reviews.filter((review) => Number(review.movie_id) === Number(movie.id))}
                   scores={scores}
@@ -139,11 +146,11 @@ export default function MovieDirectory({
         </ul>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-white/20 bg-white/5 p-12 text-center">
-          <p className="text-lg font-bold text-white">{movies.length ? "No matching films" : "Your cinema is waiting"}</p>
+          <p className="text-lg font-bold text-white">{allMovies.length ? "No matching films" : "Your cinema is waiting"}</p>
           <p className="mt-2 text-sm text-zinc-400">
-            {movies.length ? "Try another title or genre." : "Add the first movie to start collecting one-liners."}
+            {allMovies.length ? "Try another title or genre." : "Add the first movie to start collecting one-liners."}
           </p>
-          {movies.length > 0 && (
+          {allMovies.length > 0 && (
             <button type="button" onClick={() => { setSearch(""); setGenre("All"); }}
               className="mt-4 rounded-xl border border-amber-400 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-white/10">
               Clear filters
@@ -160,7 +167,8 @@ export default function MovieDirectory({
           votes={votes}
           userId={userId}
           loadError={loadError}
-          onClose={closeDetails}
+          onClose={closeMovie}
+          isNewlyAdded={newlyAddedMovie?.id === selectedMovie.id}
         />
       )}
     </section>
