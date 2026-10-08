@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Favorite Restaurants",
-  description: "Explore restaurants and create and rate AI captions.",
+  title: "OneLine Cinema | Your thoughts, one unforgettable line",
+  description: "Turn your own movie thoughts into short AI-assisted one-line reviews, then vote for the best.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
