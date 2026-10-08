@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Caption, Restaurant, Score } from "@/lib/captions";
-import RestaurantCaptions from "./restaurant-captions";
-import RestaurantPhoto from "./restaurant-photo";
+import RestaurantDirectory from "./restaurant-directory";
 import AddRestaurant from "./add-restaurant";
 export const dynamic = "force-dynamic";
 export default async function Home() {
@@ -23,7 +22,7 @@ export default async function Home() {
         )
         .not("restaurant_id", "is", null)
         .order("created_at", { ascending: false })
-        .limit(100),
+        .limit(1000),
       supabase.rpc("caption_scores"),
       user
         ? supabase
@@ -122,7 +121,7 @@ export default async function Home() {
                 return restaurant ? (
                   <li key={entry.restaurant_id}>
                     <Link
-                      href={`#restaurant-${restaurant.id}`}
+                      href={`/restaurants/${restaurant.id}`}
                       className="block rounded-lg bg-zinc-50 p-3 hover:bg-emerald-50"
                     >
                       <span className="text-xs font-semibold text-emerald-700">
@@ -145,7 +144,8 @@ export default async function Home() {
         {weeklyTop && (
           <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
             <h2 className="text-lg font-semibold">🏆 Top caption of the week</h2>
-            <p className="mt-2 text-zinc-800">{weeklyTop.caption}</p>
+            <p className="mt-2 line-clamp-3 text-zinc-800">{weeklyTop.caption}</p>
+            <Link href={`/restaurants/${weeklyTop.restaurant_id}`} className="mt-2 inline-block text-sm font-semibold text-emerald-800 hover:underline">See restaurant captions →</Link>
             <p className="mt-2 text-xs text-zinc-500">{weeklyTop.net} net votes this week · Updated as votes change</p>
           </section>
         )}
@@ -157,47 +157,14 @@ export default async function Home() {
             Unable to load restaurants. Please try again later.
           </p>
         ) : (
-          <ul className="mt-10 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {((restaurants.data || []) as Restaurant[]).map((restaurant) => (
-              <li
-                key={restaurant.id}
-                id={`restaurant-${restaurant.id}`}
-                className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
-              >
-                <RestaurantPhoto
-                  key={restaurant.photo_path || "empty"}
-                  restaurant={restaurant}
-                />
-                <h2 className="text-xl font-semibold">{restaurant.name}</h2>
-                <p className="mt-1 text-zinc-600">{restaurant.category}</p>
-                {restaurant.address && (
-                  <p className="mt-1 text-sm text-zinc-500">
-                    {restaurant.address}
-                  </p>
-                )}
-                {user && restaurant.created_by === user.id && (
-                  <AddRestaurant
-                    userId={user.id}
-                    available
-                    restaurant={restaurant}
-                  />
-                )}
-                <RestaurantCaptions
-                  restaurant={restaurant}
-                  captions={((captions.data || []) as Caption[]).filter(
-                    (c) => Number(c.restaurant_id) === restaurant.id,
-                  )}
-                  scores={(scores.data || []) as Score[]}
-                  votes={votes.data || []}
-                  userId={user?.id || null}
-                  loadError={captionError}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-        {!restaurants.error && !restaurants.data?.length && (
-          <p className="mt-10 text-zinc-600">No restaurants found.</p>
+          <RestaurantDirectory
+            restaurants={(restaurants.data || []) as Restaurant[]}
+            captions={(captions.data || []) as Caption[]}
+            scores={(scores.data || []) as Score[]}
+            votes={votes.data || []}
+            userId={user?.id || null}
+            loadError={captionError}
+          />
         )}
       </section>
     </main>
