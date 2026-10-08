@@ -121,14 +121,15 @@ export default function MoviePoster({
             </span>
           </div>
 
-          <p
-            className="shrink-0 text-center font-semibold leading-tight text-white/75 [overflow-wrap:anywhere]"
-            style={{ fontSize: "clamp(7px, 2.7cqw, 11px)" }}
+          <div
+            className="flex min-w-0 shrink-0 flex-col items-center gap-0.5 rounded-md bg-black/35 px-1 py-1 text-center leading-tight"
+            style={{ fontSize: "clamp(12px, 3.6cqw, 15px)" }}
           >
-            <span>{movie.release_year}</span>
-            <span aria-hidden="true"> · </span>
-            <span>{movie.genres[0] || "Film"}</span>
-          </p>
+            <span className="font-bold text-amber-200">{movie.release_year}</span>
+            <span className="max-w-full font-semibold text-white [overflow-wrap:anywhere]">
+              {movie.genres[0] || "Film"}
+            </span>
+          </div>
         </div>
       )}
       {url && !failed && (
