@@ -8,6 +8,7 @@ import {
   Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews,
 } from "@/lib/movies";
 import MovieReviewComposer from "./movie-review-composer";
+import type { PublicAuthor } from "@/lib/community";
 
 export default function MovieReviews({
   movie,
@@ -18,6 +19,7 @@ export default function MovieReviews({
   loadError,
   variant = "full",
   onOpenDetails,
+  authors = {},
 }: {
   movie: Movie;
   reviews: MovieReview[];
@@ -27,6 +29,7 @@ export default function MovieReviews({
   loadError: boolean;
   variant?: "preview" | "full";
   onOpenDetails?: () => void;
+  authors?: Record<string, PublicAuthor>;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
@@ -107,6 +110,16 @@ export default function MovieReviews({
                     {index === 0 && net > 0 ? "✦ Top one-liner" : "AI-assisted review"}
                   </span>
                   <span className="text-xs text-zinc-500">{review.tone}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="cinema-muted">By</span>
+                  {review.user_id && authors[review.user_id] ? (
+                    <Link href={`/u/${authors[review.user_id].handle}`} className="cinema-accent-text font-bold hover:underline">
+                      @{authors[review.user_id].handle}
+                    </Link>
+                  ) : (
+                    <span className="cinema-muted font-semibold">Film fan</span>
+                  )}
                 </div>
                 <p className={variant === "preview"
                   ? "mt-2 line-clamp-2 min-h-10 text-sm font-semibold leading-relaxed text-zinc-900"
