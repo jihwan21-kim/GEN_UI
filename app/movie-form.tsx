@@ -1,0 +1,222 @@
+"use client";
+
+import { FormEvent, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Movie, movieGenres } from "@/lib/movies";
+
+export default function MovieForm({
+  userId,
+  movie,
+}: {
+  userId: string;
+  movie?: Movie;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [refreshing, startTransition] = useTransition();
+  const [message, setMessage] = useState("");
+  const [genres, setGenres] = useState<string[]>(movie?.genres || []);
+  const [fileRights, setFileRights] = useState(false);
+
+  function toggleGenre(genre: string) {
+    setGenres((previous) => (
+      previous.includes(genre)
+        ? previous.filter((value) => value !== genre)
+        : previous.length < 3 ? [...previous, genre] : previous
+    ));
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || refreshing) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const title = String(data.get("title") || "").trim();
+    const releaseYear = Number(data.get("release_year"));
+    const file = data.get("poster") as File | null;
+    const removePoster = data.get("remove_poster") === "on";
+
+    if (title.length < 1 || title.length > 120 || !Number.isInteger(releaseYear)
+      || releaseYear < 1888 || releaseYear > new Date().getFullYear() + 3
+      || genres.length < 1 || genres.length > 3) {
+      setMessage("Enter a title, a valid release year and up to three genres.");
+      return;
+    }
+    if (file?.size) {
+      if (file.size > 5 * 1024 * 1024 ||
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setMessage("Artwork must be JPG, PNG or WebP under 5 MB.");
+        return;
+      }
+      if (!fileRights) {
+        setMessage("Confirm you own or have permission to upload this artwork.");
+        return;
+      }
+    }
+    setBusy(true);
+    setMessage("");
+    const db = createClient();
+    let uploadedPath: string | null = null;
+
+    try {
+      if (file?.size) {
+        const extension = file.type === "image/jpeg" ? "jpg" : file.type === "image/png" ? "png" : "webp";
+        uploadedPath = `${userId}/${crypto.randomUUID()}.${extension}`;
+        const { error: uploadError } = await db.storage
+          .from("movie-posters")
+          .upload(uploadedPath, file, { contentType: file.type });
+        if (uploadError) {
+          setMessage("Artwork upload failed. Please check your storage permissions.");
+          return;
+        }
+      }
+
+      const fields = {
+        title,
+        release_year: releaseYear,
+        genres,
+        poster_path: uploadedPath || (removePoster ? null : movie?.poster_path || null),
+      };
+      const query = movie
+        ? db.from("movies").update(fields).eq("id", movie.id).eq("created_by", userId)
+        : db.from("movies").insert({ ...fields, created_by: userId });
+      const { data: saved, error } = await query.select("id").single();
+      if (error || !saved) {
+        if (uploadedPath) await db.storage.from("movie-posters").remove([uploadedPath]);
+        setMessage(error?.code === "23505"
+          ? "This film and release year are already in the catalog."
+          : `Couldn't save the film${error?.code ? ` (${error.code})` : ""}. Check the movie SQL migration.`);
+        return;
+      }
+      if (movie?.poster_path && (removePoster || uploadedPath)) {
+        await db.storage.from("movie-posters").remove([movie.poster_path]);
+      }
+      if (!movie) {
+        form.reset();
+        setGenres([]);
+        setFileRights(false);
+      }
+      setOpen(false);
+      setMessage(movie ? "Movie updated." : "Movie added.");
+      startTransition(() => router.refresh());
+    } catch {
+      setMessage("Could not contact Supabase. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteMovie() {
+    if (!movie || busy || refreshing) return;
+    if (!window.confirm(`Delete "${movie.title}" and all its reviews and votes? This cannot be undone.`)) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const db = createClient();
+      const { data, error } = await db.from("movies").delete()
+        .eq("id", movie.id).eq("created_by", userId).select("id");
+      if (error || !data?.length) {
+        setMessage(`Could not delete this movie${error?.code ? ` (${error.code})` : ""}.`);
+        return;
+      }
+      if (movie.poster_path) {
+        await db.storage.from("movie-posters").remove([movie.poster_path]);
+      }
+      setOpen(false);
+      if (movie) router.push("/");
+      startTransition(() => router.refresh());
+    } catch {
+      setMessage("Could not delete this movie. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className={movie ? "mt-5" : ""}>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((previous) => !previous)}
+          disabled={busy || refreshing}
+          className="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
+        >
+          {open ? "Close form" : movie ? "Edit movie" : "+ Add a movie"}
+        </button>
+        {movie && (
+          <button
+            type="button"
+            disabled={busy || refreshing}
+            onClick={deleteMovie}
+            className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            Delete movie
+          </button>
+        )}
+      </div>
+      {open && (
+        <form onSubmit={submit} className="mt-4 grid gap-4 rounded-2xl border border-zinc-200 bg-white p-5 text-zinc-900 shadow-sm">
+          <h2 className="text-lg font-bold">{movie ? "Edit your movie" : "Add a movie to the collection"}</h2>
+          <label className="grid gap-1 text-sm font-semibold">
+            Film title
+            <input name="title" defaultValue={movie?.title || ""} required maxLength={120}
+              placeholder="e.g. Interstellar"
+              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal" />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold">
+            Release year
+            <input name="release_year" type="number" min={1888} max={new Date().getFullYear() + 3}
+              defaultValue={movie?.release_year || ""} required placeholder="2014"
+              className="rounded-lg border border-zinc-300 bg-white p-3 font-normal" />
+          </label>
+          <fieldset>
+            <legend className="text-sm font-semibold">Genres <span className="font-normal text-zinc-500">(choose 1–3)</span></legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {movieGenres.map((genre) => (
+                <label key={genre} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold ${genres.includes(genre)
+                  ? "border-amber-500 bg-amber-100 text-zinc-950"
+                  : "border-zinc-200 bg-zinc-50 text-zinc-600"}`}>
+                  <input
+                    type="checkbox"
+                    checked={genres.includes(genre)}
+                    disabled={!genres.includes(genre) && genres.length >= 3}
+                    onChange={() => toggleGenre(genre)}
+                    className="sr-only"
+                  />
+                  {genre}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="grid gap-1 text-sm font-semibold">
+            Artwork <span className="font-normal text-zinc-500">(optional, max 5 MB)</span>
+            <input name="poster" type="file" accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => { if (!event.target.files?.length) setFileRights(false); }}
+              className="rounded-lg border border-zinc-300 bg-white p-2.5 text-sm font-normal" />
+          </label>
+          <label className="flex items-start gap-2 text-xs leading-relaxed text-zinc-600">
+            <input type="checkbox" checked={fileRights} onChange={(event) => setFileRights(event.target.checked)}
+              className="mt-0.5" />
+            I own or have permission to upload the artwork. Movie posters are often copyrighted.
+          </label>
+          {movie?.poster_path && (
+            <label className="flex gap-2 text-sm text-zinc-600">
+              <input type="checkbox" name="remove_poster" /> Remove existing artwork
+            </label>
+          )}
+          <p className="text-xs text-zinc-500">
+            A custom title card will appear when no artwork is uploaded. Movie details and approved artwork will be public.
+          </p>
+          <button type="submit" disabled={busy || refreshing}
+            className="rounded-xl bg-zinc-950 px-4 py-3 text-sm font-bold text-white hover:bg-zinc-800 disabled:opacity-50">
+            {busy ? "Saving…" : movie ? "Save changes" : "Add movie"}
+          </button>
+        </form>
+      )}
+      <p role="status" aria-live="polite" className="mt-2 text-sm text-amber-700">{message}</p>
+    </div>
+  );
+}
