@@ -90,7 +90,13 @@ export default function MovieDirectory({
         <ul className="mt-6 grid items-stretch gap-5 lg:grid-cols-2 xl:grid-cols-3">
           {filtered.map((movie) => (
             <li id={`movie-${movie.id}`} key={movie.id}
-              className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl shadow-black/10">
+              onClick={(event) => {
+                const target = event.target as HTMLElement;
+                if (!target.closest("button, a, input, textarea, select, label")) {
+                  setSelectedId(movie.id);
+                }
+              }}
+              className="flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl shadow-black/10 transition-shadow hover:shadow-2xl hover:shadow-black/25">
               <div className="flex gap-4">
                 <button type="button" onClick={() => setSelectedId(movie.id)} aria-label={`View details for ${movie.title}`}
                   className="w-[38%] shrink-0 self-start rounded-xl text-left focus-visible:outline-amber-500">
