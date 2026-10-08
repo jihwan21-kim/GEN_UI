@@ -6,10 +6,7 @@ import { AuthorStats, rankAuthors, rankingModes, RankingSort, readableCount } fr
 
 export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }) {
   const [mode, setMode] = useState<RankingSort>("top_reviews");
-  const ranked = useMemo(
-    () => rankAuthors(authors.filter((author) => Number(author.published_count) > 0), mode),
-    [authors, mode],
-  );
+  const ranked = useMemo(() => rankAuthors(authors, mode), [authors, mode]);
   const active = rankingModes.find((entry) => entry.value === mode)!;
 
   return (
@@ -29,7 +26,7 @@ export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }
           </button>
         ))}
       </div>
-      <p className="cinema-muted mt-3 text-sm">{active.description}. Ties are broken by net votes, then username.</p>
+      <p className="cinema-muted mt-3 text-sm">{active.description}. Every published author is ranked, even before choosing a public username. Ties are broken by net votes.</p>
       {ranked.length ? (
         <ol className="mt-6 grid gap-3">
           {ranked.map((author, index) => (
@@ -43,14 +40,20 @@ export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }
                 <img alt="" src={author.avatar_url} className="h-12 w-12 shrink-0 rounded-full object-cover" />
               ) : (
                 <div className="cinema-tag flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold">
-                  {author.handle[0]?.toUpperCase()}
+                  {author.handle?.[0]?.toUpperCase() || "F"}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <Link href={`/u/${author.handle}`} className="cinema-accent-text break-all text-base font-bold hover:underline">
-                  @{author.handle}
-                </Link>
-                <p className="cinema-muted mt-1 line-clamp-2 text-xs">{author.bio || "Movie one-liner creator"}</p>
+                {author.handle ? (
+                  <Link href={`/u/${author.handle}`} className="cinema-accent-text break-all text-base font-bold hover:underline">
+                    @{author.handle}
+                  </Link>
+                ) : (
+                  <span className="cinema-text text-base font-bold">Film fan</span>
+                )}
+                <p className="cinema-muted mt-1 line-clamp-2 text-xs">
+                  {author.bio || (author.handle ? "Movie one-liner creator" : "Public username not set yet")}
+                </p>
               </div>
               <div className="ml-auto min-w-[105px] text-right">
                 <p className="cinema-text text-2xl font-black">{readableCount(author[mode])}</p>
@@ -62,7 +65,7 @@ export default function LeaderboardBoard({ authors }: { authors: AuthorStats[] }
       ) : (
         <div className="cinema-card mt-6 rounded-2xl border p-9 text-center">
           <p className="text-lg font-bold">Your film community starts here.</p>
-          <p className="cinema-muted mt-2 text-sm">Create a public username and publish a review to join the rankings.</p>
+          <p className="cinema-muted mt-2 text-sm">Publish a movie one-liner to enter the rankings. Add a public username to show your creator identity.</p>
           <Link href="/profile" className="cinema-accent-text mt-4 inline-block text-sm font-bold hover:underline">Create a profile →</Link>
         </div>
       )}
