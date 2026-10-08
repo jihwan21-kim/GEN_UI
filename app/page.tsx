@@ -19,7 +19,7 @@ export default async function Home() {
       supabase
         .from("generations")
         .select(
-          "id, restaurant_id, topic, tone, caption, prompt, model, created_at",
+          "id, restaurant_id, topic, tone, caption, model, created_at",
         )
         .not("restaurant_id", "is", null)
         .order("created_at", { ascending: false })
@@ -47,6 +47,14 @@ export default async function Home() {
     likes: number;
     dislikes: number;
   }[];
+  const weeklyTop = ((captions.data || []) as Caption[])
+    .filter((c) => new Date(c.created_at).getTime() >= Date.now() - 7 * 86400000)
+    .map((c) => {
+      const score = ((scores.data || []) as Score[]).find((v) => v.generation_id === c.id);
+      return { ...c, net: (score?.upvotes || 0) - (score?.downvotes || 0) };
+    })
+    .filter((c) => c.net > 0)
+    .sort((a, b) => b.net - a.net)[0];
   const captionError = !!(captions.error || scores.error || votes.error);
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
@@ -132,6 +140,13 @@ export default async function Home() {
                 ) : null;
               })}
             </ol>
+          </section>
+        )}
+        {weeklyTop && (
+          <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+            <h2 className="text-lg font-semibold">🏆 Top caption of the week</h2>
+            <p className="mt-2 text-zinc-800">{weeklyTop.caption}</p>
+            <p className="mt-2 text-xs text-zinc-500">{weeklyTop.net} net votes this week · Updated as votes change</p>
           </section>
         )}
         {restaurants.error ? (
