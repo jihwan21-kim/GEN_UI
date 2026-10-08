@@ -133,11 +133,11 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
         ref={triggerRef}
         onClick={() => { setMessage(""); setOpen(true); }}
         disabled={refreshing}
-        className="inline-flex items-center justify-center rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-60"
+        className="cinema-accent-bg inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-60"
       >
         ✨ Write with AI
       </button>
-      <p aria-live="polite" role="status" className="text-xs text-emerald-700">{success}</p>
+      {success && <p aria-live="polite" role="status" className="cinema-status rounded-lg p-2 text-xs">{success}</p>}
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-zinc-950/80 p-3 backdrop-blur-sm sm:p-6"
@@ -150,17 +150,17 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={`movie-composer-heading-${movie.id}`}
-            className="max-h-[95vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-5 text-zinc-900 shadow-2xl sm:p-7"
+            className="cinema-card max-h-[95vh] w-full max-w-xl overflow-y-auto rounded-2xl border p-5 shadow-2xl sm:p-7"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
+                <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.2em]">
                   {draft ? "Step 2 of 2 · Choose your line" : "Step 1 of 2 · Your own thoughts"}
                 </p>
                 <h2 id={`movie-composer-heading-${movie.id}`} className="mt-2 text-2xl font-bold tracking-tight">
                   {draft ? "Pick your favorite" : "Your review, one line"}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+                <p className="cinema-muted mt-2 text-sm leading-relaxed">
                   {draft
                     ? "These three lines were written from your impressions. Only your selection will be public."
                     : `Tell us what you really thought of ${movie.title}. AI will turn your thoughts into three punchy options.`}
@@ -171,13 +171,13 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
                 aria-label="Close review editor"
                 disabled={!!working}
                 onClick={() => setOpen(false)}
-                className="rounded-lg p-1 text-2xl text-zinc-500 hover:bg-zinc-100 disabled:opacity-50"
+                className="cinema-muted-card rounded-lg border p-1 text-2xl disabled:opacity-50"
               >×</button>
             </div>
             {!draft ? (
               <form onSubmit={generate} className="mt-6 grid gap-4">
                 <label htmlFor={`movie-impression-${movie.id}`} className="text-sm font-semibold">
-                  Your thoughts <span className="font-normal text-zinc-500">(private)</span>
+                  Your thoughts <span className="cinema-muted font-normal">(private)</span>
                 </label>
                 <textarea
                   id={`movie-impression-${movie.id}`}
@@ -189,80 +189,80 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
                   value={impression}
                   onChange={(event) => setImpression(event.target.value)}
                   placeholder="What stayed with you? What moved you, surprised you or annoyed you? Write freely. Your original thoughts won't be shown publicly."
-                  className="w-full resize-y rounded-xl border border-zinc-300 bg-white p-4 text-sm leading-relaxed placeholder:text-zinc-400"
+                  className="cinema-input w-full resize-y rounded-xl p-4 text-sm leading-relaxed"
                 />
-                <p className="-mt-2 text-right text-xs text-zinc-500">{impression.length.toLocaleString()} / 5,000 characters</p>
+                <p className="cinema-muted -mt-2 text-right text-xs">{impression.length.toLocaleString()} / 5,000 characters</p>
                 <fieldset>
                   <legend className="mb-2 text-sm font-semibold">Choose a voice</legend>
                   <div className="flex flex-wrap gap-2">
                     {reviewTones.map((value) => (
                       <label key={value} className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold ${tone === value
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:border-amber-400"}`}>
+                        ? "cinema-accent-bg"
+                        : "cinema-muted-card"}`}>
                         <input type="radio" name="tone" value={value} checked={tone === value}
                           onChange={() => setTone(value)} className="sr-only" />
-                        {value}
+                        {tone === value ? "✓ " : ""}{value}
                       </label>
                     ))}
                   </div>
                 </fieldset>
-                <label className="flex items-center gap-3 rounded-xl bg-zinc-50 px-4 py-3 text-sm font-semibold">
+                <label className="cinema-muted-card flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold">
                   <input type="checkbox" checked={spoilerFree}
                     onChange={(event) => setSpoilerFree(event.target.checked)} />
                   Keep it spoiler-free
                 </label>
-                <p className="text-xs leading-relaxed text-zinc-500">
+                <p className="cinema-muted text-xs leading-relaxed">
                   AI aims for 5–12 words per line (15 maximum). Your full review and unselected drafts
                   stay private. You get 10 generations per day.
                 </p>
-                {message && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{message}</p>}
+                {message && <p role="alert" className="cinema-status rounded-lg p-3 text-sm">{message}</p>}
                 <button disabled={!!working || refreshing || impression.trim().length < 20}
-                  className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50">
+                  className="cinema-accent-bg rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50">
                   {working === "generate" ? "Crafting three one-liners…" : "✨ Generate 3 one-liners"}
                 </button>
               </form>
             ) : (
               <div className="mt-6 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <p className="cinema-muted text-xs font-semibold uppercase tracking-wider">
                   {tone} · {spoilerFree ? "Spoiler-free" : "Spoilers allowed"}
                 </p>
                 {draft.options.map((option, index) => (
                   <label
                     key={index}
                     className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm leading-relaxed transition-colors ${selected === index
-                      ? "border-amber-500 bg-amber-50 text-zinc-900 ring-1 ring-amber-300"
-                      : "border-zinc-200 bg-white text-zinc-800 hover:border-amber-300"}`}
+                      ? "cinema-accent-bg ring-2 ring-[var(--cinema-accent)]"
+                      : "cinema-muted-card"}`}
                   >
                     <input
                       type="radio"
                       name={`movie-line-choice-${movie.id}`}
                       checked={selected === index}
                       onChange={() => setSelected(index)}
-                      className="mt-1 accent-amber-600"
+                      className="mt-1 accent-[var(--cinema-accent)]"
                     />
-                    <span className="flex-1 font-medium">{option}</span>
+                    <span className="flex-1 font-medium">{selected === index ? "✓ " : ""}{option}</span>
                   </label>
                 ))}
-                <p className="text-xs text-zinc-500">Only one selected line will be published and receive votes.</p>
-                {message && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{message}</p>}
+                <p className="cinema-muted text-xs">Only one selected line will be published and receive votes.</p>
+                {message && <p role="alert" className="cinema-status rounded-lg p-3 text-sm">{message}</p>}
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => { setDraft(null); setSelected(null); setMessage(""); }}
                     disabled={!!working}
-                    className="rounded-xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                    className="cinema-outline rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50"
                   >
                     ← Edit thoughts
                   </button>
                   <button type="button" onClick={() => void generate()} disabled={!!working}
-                    className="rounded-xl border border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50">
+                    className="cinema-outline rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50">
                     {working === "generate" ? "Regenerating…" : "↻ Regenerate"}
                   </button>
                   <button
                     type="button"
                     onClick={() => void publish()}
                     disabled={selected === null || !!working}
-                    className="min-w-36 flex-1 rounded-xl bg-amber-400 px-4 py-3 text-sm font-bold text-zinc-950 hover:bg-amber-300 disabled:opacity-50"
+                    className="cinema-accent-bg min-w-36 flex-1 rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50"
                   >
                     {working === "publish" ? "Publishing…" : "Publish selected →"}
                   </button>
