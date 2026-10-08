@@ -30,11 +30,11 @@ export default function LoginPage() {
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
       <section className="mx-auto max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
-          HW3 / Authentication
+          OneLine Cinema / Authentication
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight">Sign in</h1>
         <p className="mt-3 text-zinc-600">
-          Use Google to sign in and return to the restaurant list. You can edit
+          Use Google to sign in and return to the film collection. You can edit
           your profile at any time.
         </p>
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
           href="/"
           className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
         >
-          Back to restaurant list
+          Back to movie collection
         </Link>
       </section>
     </main>
