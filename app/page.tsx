@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews } from "@/lib/movies";
+import { buildAuthorMap, PublicAuthor } from "@/lib/community";
 import MovieDirectory from "./movie-directory";
 import MovieForm from "./movie-form";
 import MovieSpotlightLink from "./movie-spotlight-link";
@@ -12,13 +13,13 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const [moviesResult, reviewsResult, scoresResult, votesResult] = await Promise.all([
+  const [moviesResult, reviewsResult, scoresResult, votesResult, authorsResult] = await Promise.all([
     supabase.from("movies")
       .select("id, title, release_year, genres, poster_path, created_by, created_at")
       .order("title", { ascending: true })
       .limit(500),
     supabase.from("movie_reviews")
-      .select("id, movie_id, one_liner, tone, created_at")
+      .select("id, movie_id, user_id, one_liner, tone, created_at")
       .order("created_at", { ascending: false })
       .limit(2000),
     supabase.rpc("movie_review_scores"),
@@ -27,12 +28,22 @@ export default async function Home() {
           .select("review_id, value")
           .eq("user_id", user.id)
       : Promise.resolve({ data: [] as MovieVote[], error: null }),
+    supabase.from("movie_public_profiles")
+      .select("user_id, handle, bio, avatar_url")
+      .limit(2000),
   ]);
+  // Keep the old movie-only experience working until the additive community SQL is applied.
+  const oldReviewsResult = reviewsResult.error
+    ? await supabase.from("movie_reviews")
+        .select("id, movie_id, one_liner, tone, created_at")
+        .order("created_at", { ascending: false }).limit(2000)
+    : null;
   const movies = (moviesResult.data || []) as Movie[];
-  const reviews = (reviewsResult.data || []) as MovieReview[];
+  const reviews = (reviewsResult.data || oldReviewsResult?.data || []) as MovieReview[];
+  const authors = buildAuthorMap((authorsResult.data || []) as PublicAuthor[]);
   const scores = (scoresResult.data || []) as MovieScore[];
   const votes = (votesResult.data || []) as MovieVote[];
-  const loadError = !!(reviewsResult.error || scoresResult.error || votesResult.error);
+  const loadError = !!((reviewsResult.error && oldReviewsResult?.error) || scoresResult.error || votesResult.error);
   const topThisWeek = sortMovieReviews(
     reviews.filter((review) =>
       new Date(review.created_at).getTime() >= Date.now() - 7 * 86_400_000),
@@ -84,7 +95,7 @@ export default async function Home() {
         {topThisWeek && topMovie && (
           <section className="cinema-card mt-8 rounded-2xl border p-5 sm:p-7" aria-labelledby="weekly-title">
             <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.2em]">✦ Community spotlight</p>
-            <h2 id="weekly-title" className="mt-2 text-xl font-bold text-white">One-liner of the week</h2>
+            <h2 id="weekly-title" className="mt-2 text-xl font-bold cinema-text">One-liner of the week</h2>
             <blockquote className="cinema-text mt-3 max-w-3xl text-lg font-semibold leading-relaxed sm:text-2xl">
               “{topThisWeek.one_liner}”
             </blockquote>
@@ -92,6 +103,11 @@ export default async function Home() {
               <span>{topMovie.title} ({topMovie.release_year})</span>
               <span>·</span>
               <span>{topThisWeek.tone}</span>
+              {topThisWeek.user_id && authors[topThisWeek.user_id] && (
+                <Link href={`/u/${authors[topThisWeek.user_id].handle}`} className="cinema-accent-text font-bold hover:underline">
+                  By @{authors[topThisWeek.user_id].handle}
+                </Link>
+              )}
               <MovieSpotlightLink movieId={topMovie.id} />
             </div>
           </section>
@@ -109,6 +125,7 @@ export default async function Home() {
           <MovieDirectory
             movies={movies}
             reviews={reviews}
+            authors={authors}
             scores={scores}
             votes={votes}
             userId={user?.id || null}
