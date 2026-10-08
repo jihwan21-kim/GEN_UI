@@ -22,9 +22,7 @@ export default function RestaurantCaptions({
   const router = useRouter();
   const [refreshing, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
-  const [topic, setTopic] = useState(
-    `A weekend food run to ${restaurant.name}`,
-  );
+  const [topic, setTopic] = useState("");
   const [tone, setTone] = useState<string>(tones[0]);
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
@@ -131,6 +129,7 @@ export default function RestaurantCaptions({
               maxLength={200}
               rows={2}
               value={topic}
+              placeholder="What makes this restaurant special? A dish, a moment, or a local tip…"
               onChange={(e) => setTopic(e.target.value)}
               className="mt-2 w-full rounded-lg border border-zinc-300 bg-white p-3"
             />
@@ -148,7 +147,7 @@ export default function RestaurantCaptions({
             </select>
           </label>
           <p className="text-xs text-zinc-500">
-            Your idea and prompt will be public. 10 generation attempts per day.
+            Your caption will be public. Your idea and generation prompt are saved privately. 10 generation attempts per day.
           </p>
           <button
             disabled={busy || loadError}
@@ -209,13 +208,6 @@ export default function RestaurantCaptions({
                     </span>
                   )}
                 </div>
-                <details className="mt-3 text-xs text-zinc-500">
-                  <summary className="cursor-pointer">View prompt</summary>
-                  <p className="mt-2">Model: {c.model}</p>
-                  <p className="mt-2 whitespace-pre-wrap break-words">
-                    {c.prompt}
-                  </p>
-                </details>
               </li>
             );
           })}
