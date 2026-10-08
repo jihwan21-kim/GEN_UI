@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AuthorStats, readableCount } from "@/lib/community";
+import { readableCount } from "@/lib/community";
+import { loadCommunityRankings } from "@/lib/community-server";
 import type { Movie, MovieReview, MovieScore } from "@/lib/movies";
 import { reviewScore } from "@/lib/movies";
 import CinemaNavigation from "../../cinema-navigation";
@@ -16,13 +17,13 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
   const [
     { data: { user } },
     { data: author, error: profileError },
-    { data: allStats },
+    { authors: allStats },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("movie_public_profiles")
       .select("user_id, handle, bio, avatar_url")
       .eq("handle", handle).maybeSingle(),
-    supabase.rpc("movie_author_stats"),
+    loadCommunityRankings(supabase),
   ]);
   if (profileError || !author) notFound();
 
@@ -41,7 +42,7 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
     : { data: [] };
   const films = new Map((movieResult.data || []).map((movie) => [movie.id, movie as Pick<Movie, "id" | "title" | "release_year">]));
   const byReview = new Map(scores.map((entry) => [entry.review_id, entry]));
-  const stats = ((allStats || []) as AuthorStats[]).find((entry) => entry.user_id === author.user_id);
+  const stats = allStats.find((entry) => entry.user_id === author.user_id);
 
   return (
     <main className="cinema-app cinema-page px-5 py-8 pb-20 sm:px-8 sm:py-12">
