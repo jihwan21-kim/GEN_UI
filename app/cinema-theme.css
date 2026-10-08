@@ -1,0 +1,116 @@
+:root {
+  --cinema-bg: #101115;
+  --cinema-text: #f4f4f5;
+  --cinema-muted: #bfc3cc;
+  --cinema-faint: #a1a1aa;
+  --cinema-card: #242630;
+  --cinema-card-muted: #30323e;
+  --cinema-input: #1b1d26;
+  --cinema-border: #52535f;
+  --cinema-accent: #fbbf24;
+  --cinema-accent-hover: #fcd34d;
+  --cinema-accent-on: #18181b;
+  --cinema-link: #fcd34d;
+  --cinema-hero-from: #27232c;
+  --cinema-hero-to: #14151a;
+  --cinema-tag: #373945;
+  --cinema-status: #2e281b;
+  --cinema-status-text: #fde68a;
+}
+
+html[data-cinema-theme="light"] {
+  --cinema-bg: #f6f5f1;
+  --cinema-text: #20212a;
+  --cinema-muted: #4e5563;
+  --cinema-faint: #636b78;
+  --cinema-card: #ffffff;
+  --cinema-card-muted: #eeeff2;
+  --cinema-input: #ffffff;
+  --cinema-border: #c9ccd2;
+  --cinema-accent: #a94705;
+  --cinema-accent-hover: #873507;
+  --cinema-accent-on: #ffffff;
+  --cinema-link: #93400c;
+  --cinema-hero-from: #fff5e2;
+  --cinema-hero-to: #f3eadd;
+  --cinema-tag: #eceef0;
+  --cinema-status: #fff1d3;
+  --cinema-status-text: #71330b;
+}
+
+/* A clearer blue/cyan accent and higher-contrast borders for users who
+   distinguish these hues more easily than red/green or amber. Important
+   states retain text labels and icons; color is never the only cue. */
+html[data-cinema-vision="accessible"] {
+  --cinema-accent: #6bd8ff;
+  --cinema-accent-hover: #9ce7ff;
+  --cinema-accent-on: #081a27;
+  --cinema-link: #9ce7ff;
+  --cinema-border: #9aa6b5;
+  --cinema-status-text: #ffffff;
+}
+html[data-cinema-theme="light"][data-cinema-vision="accessible"] {
+  --cinema-accent: #075ca8;
+  --cinema-accent-hover: #064580;
+  --cinema-accent-on: #ffffff;
+  --cinema-link: #064f95;
+  --cinema-border: #64748b;
+  --cinema-status-text: #20212a;
+}
+
+.cinema-app { background: var(--cinema-bg); color: var(--cinema-text); }
+.cinema-page { min-height: 100vh; }
+.cinema-card {
+  background: var(--cinema-card);
+  color: var(--cinema-text);
+  border-color: var(--cinema-border);
+}
+.cinema-muted-card {
+  background: var(--cinema-card-muted);
+  color: var(--cinema-text);
+  border-color: var(--cinema-border);
+}
+.cinema-hero {
+  color: var(--cinema-text);
+  background: linear-gradient(125deg, var(--cinema-hero-from), var(--cinema-hero-to));
+  border-color: var(--cinema-border);
+}
+.cinema-text { color: var(--cinema-text); }
+.cinema-muted { color: var(--cinema-muted); }
+.cinema-faint { color: var(--cinema-faint); }
+.cinema-accent-text { color: var(--cinema-link); }
+.cinema-accent-bg { background-color: var(--cinema-accent); color: var(--cinema-accent-on); }
+.cinema-accent-bg:hover { background-color: var(--cinema-accent-hover); }
+.cinema-tag { background: var(--cinema-tag); color: var(--cinema-text); }
+.cinema-outline {
+  color: var(--cinema-link);
+  border: 1px solid var(--cinema-accent);
+  background: transparent;
+}
+.cinema-outline:hover { background: var(--cinema-accent); color: var(--cinema-accent-on); }
+.cinema-input {
+  color: var(--cinema-text);
+  border: 1px solid var(--cinema-border);
+  background: var(--cinema-input);
+}
+.cinema-input::placeholder { color: var(--cinema-faint); }
+.cinema-display-select {
+  background: var(--cinema-card);
+  color: var(--cinema-text);
+  border: 1px solid var(--cinema-border);
+}
+.cinema-status {
+  background: var(--cinema-status);
+  color: var(--cinema-status-text);
+  border: 1px solid var(--cinema-border);
+}
+.cinema-separator { border-color: var(--cinema-border); }
+.cinema-app a:not([class*="hover:"]):hover { text-decoration: underline; }
+.cinema-app :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--cinema-accent);
+  outline-offset: 3px;
+}
+html[data-cinema-vision="accessible"] .cinema-app a {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
