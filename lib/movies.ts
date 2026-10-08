@@ -18,6 +18,7 @@ export type Movie = {
 
 export type MovieReview = {
   id: string;
+  user_id?: string;
   movie_id: number;
   one_liner: string;
   tone: ReviewTone;
