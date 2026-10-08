@@ -22,6 +22,7 @@ export default function RestaurantCaptions({
   const router = useRouter();
   const [refreshing, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState<string>(tones[0]);
   const [busy, setBusy] = useState(false);
@@ -34,6 +35,14 @@ export default function RestaurantCaptions({
     added && !captions.some((c) => c.id === added.id)
       ? [added, ...captions]
       : captions;
+  const ranked = [...shown].sort((a, b) => {
+    const aScore = counts[a.id];
+    const bScore = counts[b.id];
+    const aNet = (aScore?.upvotes || 0) - (aScore?.downvotes || 0);
+    const bNet = (bScore?.upvotes || 0) - (bScore?.downvotes || 0);
+    return bNet - aNet || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+  const visible = showAll ? ranked : ranked.slice(0, 2);
   async function generate(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
@@ -172,8 +181,12 @@ export default function RestaurantCaptions({
       ) : shown.length === 0 ? (
         <p className="mt-3 text-sm text-zinc-500">No AI captions yet.</p>
       ) : (
-        <ul className="mt-4 grid gap-3">
-          {shown.map((c) => {
+        <div className="mt-4 flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-zinc-800">AI Captions <span className="font-normal text-zinc-500">({ranked.length})</span></h3>
+          <span className="text-xs text-zinc-500">Most liked first</span>
+        </div>
+        <ul className="mt-3 grid gap-3">
+          {visible.map((c) => {
             const selected = mine[c.id];
             const score = counts[c.id];
             return (
@@ -192,9 +205,9 @@ export default function RestaurantCaptions({
                       aria-label={`${value === 1 ? "Upvote" : "Downvote"} caption for ${restaurant.name}`}
                       aria-pressed={selected === value}
                       onClick={() => vote(c.id, value)}
-                      className={`rounded-lg border px-3 py-1.5 text-sm disabled:cursor-default ${selected === value ? "border-emerald-600 bg-emerald-50 text-emerald-800" : "border-zinc-200 disabled:opacity-60"}`}
+                      className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-default ${selected === value ? "border-emerald-600 bg-emerald-700 text-white" : "border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-60"}`}
                     >
-                      {value === 1 ? "↑ Like" : "↓ Dislike"}{" "}
+                      {value === 1 ? "👍" : "👎"}{" "}
                       {Number(
                         value === 1
                           ? score?.upvotes || 0
@@ -212,6 +225,16 @@ export default function RestaurantCaptions({
             );
           })}
         </ul>
+      )}
+      {!loadError && ranked.length > 2 && (
+        <button
+          type="button"
+          aria-expanded={showAll}
+          onClick={() => setShowAll((previous) => !previous)}
+          className="mt-3 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+        >
+          {showAll ? "Show fewer captions ↑" : `View more captions (${ranked.length - 2}) ↓`}
+        </button>
       )}
     </div>
   );
