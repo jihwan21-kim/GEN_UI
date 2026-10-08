@@ -1,85 +1,101 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AuthorStats, rankAuthors, readableCount } from "@/lib/community";
+import CinemaNavigation from "../cinema-navigation";
 import ProfileForm from "./profile-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  if (!user) {
-    redirect("/login");
-  }
+  const [profileResult, publicProfileResult, rankingResult] = await Promise.all([
+    supabase.from("profiles")
+      .select("first_name, last_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase.from("movie_public_profiles")
+      .select("user_id, handle, bio, avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase.rpc("movie_author_stats"),
+  ]);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("first_name, last_name, avatar_url")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const needsProfile =
-    !profile?.first_name?.trim() || !profile?.last_name?.trim();
+  const profile = profileResult.data;
+  const publicProfile = publicProfileResult.data;
+  const rankings = (rankingResult.data || []) as AuthorStats[];
+  const stats = rankings.find((entry) => entry.user_id === user.id);
+  const position = stats
+    ? rankAuthors(rankings, "top_reviews").findIndex((entry) => entry.user_id === user.id) + 1
+    : null;
+  const needsProfile = !profile?.first_name?.trim() || !profile?.last_name?.trim();
+  const communityNotReady = Boolean(publicProfileResult.error || rankingResult.error);
 
   return (
-    <main className="min-h-screen bg-[#101115] px-5 py-8 text-white sm:px-8 sm:py-12">
+    <main className="cinema-app cinema-page px-5 py-8 sm:px-8 sm:py-12">
       <div className="mx-auto max-w-5xl">
-        <nav aria-label="Main navigation" className="flex flex-wrap items-center justify-between gap-4">
-          <Link href="/" className="inline-flex items-center gap-3 text-base font-black tracking-tight text-white sm:text-lg">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400 text-xl text-zinc-950" aria-hidden="true">✦</span>
-            OneLine <span className="text-amber-300">Cinema</span>
-          </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link href="/" className="rounded-lg px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-white/10 hover:text-white">
-              ← Explore films
-            </Link>
-            <form action="/auth/signout" method="post">
-              <button
-                type="submit"
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Sign out
-              </button>
-            </form>
-          </div>
-        </nav>
-
-        <section className="mx-auto mt-10 max-w-2xl sm:mt-14">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-300">
+        <CinemaNavigation signedIn />
+        <section className="mx-auto mt-10 max-w-3xl sm:mt-14">
+          <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">
             OneLine Cinema / Account
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-            Your <span className="text-amber-300">profile</span>
+            Your <span className="cinema-accent-text">profile</span>
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-300">
-            Manage your name and profile photo. Your movie reviews and votes stay connected to your account.
+          <p className="cinema-muted mt-3 text-sm leading-relaxed">
+            Create your public @username, share a little about yourself, and track your movie-review achievements.
           </p>
 
+          {communityNotReady && (
+            <p role="alert" className="cinema-status mt-6 rounded-xl p-4 text-sm">
+              Community setup needed: run <code>supabase/movie_community.sql</code> in your
+              Supabase SQL Editor to enable usernames, public profiles and rankings.
+            </p>
+          )}
           {needsProfile && (
-            <p className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">
-              Welcome! Add your first and last name to complete your profile.
+            <p className="cinema-status mt-6 rounded-xl p-4 text-sm">
+              Welcome! Add your name and pick your creator username below.
             </p>
           )}
 
-          <div className="mt-8 rounded-3xl border border-white/10 bg-gradient-to-br from-[#27232c] via-[#1b1c24] to-[#17181e] p-5 shadow-2xl shadow-black/20 sm:p-8">
+          <div className="mt-7 grid gap-3 sm:grid-cols-4">
+            {[
+              { value: stats?.published_count, label: "Published AI lines", icon: "✦" },
+              { value: stats?.likes_received, label: "Likes received", icon: "👍" },
+              { value: stats?.top_reviews, label: "#1 movie reviews", icon: "🏆" },
+              { value: position, label: "Leaderboard position", icon: "★", rank: true },
+            ].map((item) => (
+              <div key={item.label} className="cinema-card rounded-2xl border p-4">
+                <span aria-hidden="true" className="cinema-accent-text text-lg">{item.icon}</span>
+                <p className="mt-2 text-2xl font-black">{item.rank && item.value ? "#" : ""}
+                  {item.value == null ? "—" : readableCount(item.value)}
+                </p>
+                <p className="cinema-muted mt-1 text-xs">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <p className="cinema-muted mt-2 text-xs">
+            Counts include published reviews only. A #1 review has the highest positive net vote score for its movie; ties count.
+          </p>
+
+          <div className="cinema-card mt-8 rounded-3xl border p-5 shadow-xl sm:p-8">
             <ProfileForm
               userId={user.id}
               email={user.email ?? ""}
               initialFirstName={profile?.first_name ?? ""}
               initialLastName={profile?.last_name ?? ""}
               initialAvatarUrl={profile?.avatar_url ?? ""}
+              initialHandle={publicProfile?.handle ?? ""}
+              initialBio={publicProfile?.bio ?? ""}
             />
           </div>
-
-          <Link
-            href="/"
-            className="mt-7 inline-block text-sm font-semibold text-amber-300 hover:text-amber-200 hover:underline"
-          >
-            ← Back to movie collection
-          </Link>
+          <div className="mt-7 flex flex-wrap gap-5 text-sm font-semibold">
+            <Link href="/leaderboard" className="cinema-accent-text hover:underline">See community rankings →</Link>
+            <Link href="/" className="cinema-muted hover:underline">← Back to movie collection</Link>
+          </div>
         </section>
       </div>
     </main>
