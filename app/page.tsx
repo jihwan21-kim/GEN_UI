@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Caption, Restaurant, Score } from "@/lib/captions";
-import RestaurantCaptions from "./restaurant-captions";
-import RestaurantPhoto from "./restaurant-photo";
+import RestaurantDirectory from "./restaurant-directory";
 import AddRestaurant from "./add-restaurant";
 export const dynamic = "force-dynamic";
 export default async function Home() {
@@ -23,7 +22,7 @@ export default async function Home() {
         )
         .not("restaurant_id", "is", null)
         .order("created_at", { ascending: false })
-        .limit(100),
+        .limit(1000),
       supabase.rpc("caption_scores"),
       user
         ? supabase
@@ -157,44 +156,14 @@ export default async function Home() {
             Unable to load restaurants. Please try again later.
           </p>
         ) : (
-          <ul className="mt-10 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {((restaurants.data || []) as Restaurant[]).map((restaurant) => (
-              <li
-                key={restaurant.id}
-                id={`restaurant-${restaurant.id}`}
-                className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
-              >
-                <RestaurantPhoto
-                  key={restaurant.photo_path || "empty"}
-                  restaurant={restaurant}
-                />
-                <h2 className="text-xl font-semibold">{restaurant.name}</h2>
-                <p className="mt-1 text-zinc-600">{restaurant.category}</p>
-                {restaurant.address && (
-                  <p className="mt-1 text-sm text-zinc-500">
-                    {restaurant.address}
-                  </p>
-                )}
-                {user && restaurant.created_by === user.id && (
-                  <AddRestaurant
-                    userId={user.id}
-                    available
-                    restaurant={restaurant}
-                  />
-                )}
-                <RestaurantCaptions
-                  restaurant={restaurant}
-                  captions={((captions.data || []) as Caption[]).filter(
-                    (c) => Number(c.restaurant_id) === restaurant.id,
-                  )}
-                  scores={(scores.data || []) as Score[]}
-                  votes={votes.data || []}
-                  userId={user?.id || null}
-                  loadError={captionError}
-                />
-              </li>
-            ))}
-          </ul>
+          <RestaurantDirectory
+            restaurants={(restaurants.data || []) as Restaurant[]}
+            captions={(captions.data || []) as Caption[]}
+            scores={(scores.data || []) as Score[]}
+            votes={votes.data || []}
+            userId={user?.id || null}
+            loadError={captionError}
+          />
         )}
         {!restaurants.error && !restaurants.data?.length && (
           <p className="mt-10 text-zinc-600">No restaurants found.</p>
