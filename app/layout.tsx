@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./cinema-theme.css";
+import { CinemaThemeProvider } from "./cinema-theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Favorite Restaurants",
-  description: "Explore restaurants and create and rate AI captions.",
+  title: "OneLine Cinema | Your thoughts, one unforgettable line",
+  description: "Turn your own movie thoughts into short AI-assisted one-line reviews, then vote for the best.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col"><CinemaThemeProvider>{children}</CinemaThemeProvider></body>
     </html>
   );
 }
