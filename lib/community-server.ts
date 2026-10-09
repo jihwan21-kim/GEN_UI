@@ -34,13 +34,14 @@ export async function loadCommunityRankings(
   const reviews = reviewsResult.data || [];
   const scores = scoresResult.data || [];
   const profiles = (profilesResult.data || []) as PublicAuthor[];
-  const scoreById = new Map(scores.map((score) => [
-    score.review_id,
-    {
+  // Populate the map explicitly to keep TypeScript's key/value types stable.
+  const scoreById = new Map<string, { likes: number; dislikes: number }>();
+  for (const score of scores) {
+    scoreById.set(String(score.review_id), {
       likes: Number(score.upvotes || 0),
       dislikes: Number(score.downvotes || 0),
-    },
-  ]));
+    });
+  }
   const highestByMovie = new Map<number, number>();
 
   for (const review of reviews) {
