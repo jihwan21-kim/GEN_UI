@@ -39,7 +39,7 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
               key={tab.href}
               href={tab.href}
               aria-current={tab.active ? "page" : undefined}
-              className={`rounded-xl px-3.5 py-2.5 text-sm font-bold transition-colors ${tab.active ? "cinema-muted-card" : "cinema-muted hover:cinema-text"}`}
+              className={`rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-colors ${tab.active ? "cinema-muted-card" : "cinema-card cinema-muted"}`}
             >
               {tab.label}
             </Link>
