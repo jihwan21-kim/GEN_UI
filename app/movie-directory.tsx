@@ -131,7 +131,8 @@ export default function MovieDirectory({
                   </p>
                 </div>
               </div>
-              <div className="cinema-separator mt-auto border-t pt-4">
+              <div className="mt-auto pt-5 sm:pt-6">
+                <div className="cinema-separator border-t pt-4">
                 <MovieReviews
                   variant="preview"
                   authors={authors}
@@ -143,6 +144,7 @@ export default function MovieDirectory({
                   userId={userId}
                   loadError={loadError}
                 />
+                </div>
               </div>
             </li>
           ))}
