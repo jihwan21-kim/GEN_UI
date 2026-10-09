@@ -96,7 +96,7 @@ export default function MovieDirectory({
       </div>
 
       {filtered.length > 0 ? (
-        <ul className="mt-6 grid items-stretch gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-6 grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
           {filtered.map((movie) => (
             <li id={`movie-${movie.id}`} key={movie.id}
               onClick={(event) => {
@@ -105,10 +105,10 @@ export default function MovieDirectory({
                   showMovie(movie.id);
                 }
               }}
-              className="cinema-card flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 shadow-xl shadow-black/10 transition-shadow hover:shadow-2xl hover:shadow-black/25">
-              <div className="flex gap-4">
+              className="cinema-card flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border p-4 xl:p-5 shadow-xl shadow-black/10 transition-shadow hover:shadow-2xl hover:shadow-black/25">
+              <div className="flex gap-3 xl:gap-4">
                 <button type="button" onClick={() => showMovie(movie.id)} aria-label={`View details for ${movie.title}`}
-                  className="w-[38%] shrink-0 self-start rounded-xl text-left focus-visible:outline-amber-500">
+                  className="w-[38%] max-w-[180px] shrink-0 self-start rounded-xl text-left focus-visible:outline-amber-500">
                   <MoviePoster movie={movie} className="shadow-md" />
                 </button>
                 <div className="min-w-0 flex-1 py-1">
