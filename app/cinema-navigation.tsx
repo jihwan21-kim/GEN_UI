@@ -39,7 +39,7 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
               key={tab.href}
               href={tab.href}
               aria-current={tab.active ? "page" : undefined}
-              className={`rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-colors ${tab.active ? "cinema-muted-card" : "cinema-card cinema-muted"}`}
+              className="cinema-nav-tab inline-flex min-h-10 items-center justify-center rounded-xl border px-3.5 py-2.5 text-sm font-bold transition-colors"
             >
               {tab.label}
             </Link>
@@ -88,7 +88,7 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
             key={tab.href}
             href={tab.href}
             aria-current={tab.active ? "page" : undefined}
-            className={`flex min-h-11 items-center justify-center rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors ${tab.active ? "cinema-accent-bg" : "cinema-card"}`}
+            className="cinema-nav-tab flex min-h-11 items-center justify-center rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors"
           >
             {tab.label}
           </Link>
