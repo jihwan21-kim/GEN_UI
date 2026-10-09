@@ -82,6 +82,27 @@ html[data-cinema-theme="light"][data-cinema-vision="accessible"] {
 .cinema-accent-bg { background-color: var(--cinema-accent); color: var(--cinema-accent-on); }
 .cinema-accent-bg:hover { background-color: var(--cinema-accent-hover); }
 .cinema-tag { background: var(--cinema-tag); color: var(--cinema-text); }
+/* A filled, high-contrast active tab is easier to locate than a slightly
+   lighter gray surface. aria-current makes the state available to AT. */
+.cinema-nav-tab {
+  background: var(--cinema-card);
+  color: var(--cinema-muted);
+  border-color: var(--cinema-border);
+  text-decoration: none;
+}
+.cinema-nav-tab:hover:not([aria-current="page"]) {
+  background: var(--cinema-card-muted);
+  color: var(--cinema-text);
+}
+.cinema-nav-tab[aria-current="page"] {
+  background: var(--cinema-accent);
+  border-color: var(--cinema-accent);
+  color: var(--cinema-accent-on);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 18%);
+}
+.cinema-nav-tab[aria-current="page"]:hover {
+  background: var(--cinema-accent-hover);
+}
 .cinema-outline {
   color: var(--cinema-link);
   border: 1px solid var(--cinema-accent);
