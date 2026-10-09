@@ -154,7 +154,7 @@ export default function MovieForm({
           aria-expanded={open}
           onClick={() => { setMessage(""); setOpen((previous) => !previous); }}
           disabled={busy || refreshing}
-          className="cinema-accent-bg inline-flex h-12 w-[180px] shrink-0 items-center justify-center rounded-xl px-5 text-sm font-bold disabled:opacity-50"
+          className="cinema-accent-bg inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl px-4 text-sm font-bold disabled:opacity-50 sm:w-[180px] sm:px-5"
         >
           {open ? "Close form" : movie ? "Edit movie" : "+ Add a movie"}
         </button>
