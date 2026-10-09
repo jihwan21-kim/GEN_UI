@@ -57,34 +57,34 @@ export default async function Home() {
   return (
     <main className="cinema-app cinema-page pb-20">
       <MovieSelectionProvider>
-      <div className="mx-auto max-w-7xl px-5 pt-7 sm:px-8 sm:pt-10">
+      <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn={Boolean(user)} />
-        <section className="cinema-hero relative mt-10 overflow-hidden rounded-[2rem] border px-6 py-12 sm:px-12 sm:py-16">
+        <section className="cinema-hero relative mt-6 overflow-hidden rounded-[1.5rem] border px-5 py-9 sm:mt-10 sm:rounded-[2rem] sm:px-12 sm:py-16">
           <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-amber-300/10 blur-3xl" />
           <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-5 select-none text-[12rem] leading-none text-white/[0.035] sm:text-[18rem]">✦</div>
           <div className="relative max-w-3xl">
             <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.27em]">
               Film reviews, distilled.
             </p>
-            <h1 className="mt-5 text-4xl font-black leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 text-[2.45rem] font-black leading-[1.08] tracking-tight sm:mt-5 sm:text-5xl lg:text-6xl">
               Your thoughts.<br />
               <span className="cinema-accent-text">One unforgettable line.</span>
             </h1>
-            <p className="cinema-muted mt-5 max-w-2xl text-base leading-relaxed sm:text-lg">
+            <p className="cinema-muted mt-4 max-w-2xl text-[0.98rem] leading-7 sm:mt-5 sm:text-lg">
               Write what a movie made you feel. Let AI shape your impression into
               three sharp one-liners. Pick one, publish, and let the audience vote.
             </p>
-            <div className="mt-7 flex flex-wrap items-start gap-3">
-              <a href="#movie-collection-title" className="cinema-accent-bg inline-flex h-12 w-[180px] items-center justify-center rounded-xl px-5 text-sm font-bold">
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:flex sm:flex-wrap sm:items-start">
+              <a href="#movie-collection-title" className="cinema-accent-bg inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-bold sm:w-[180px] sm:px-5">
                 Explore films ↓
               </a>
               {user ? <MovieForm userId={user.id} /> : (
-                <Link href="/login" className="cinema-outline inline-flex h-12 w-[180px] items-center justify-center rounded-xl px-5 text-sm font-bold transition-colors">
+                <Link href="/login" className="cinema-outline inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-bold transition-colors sm:w-[180px] sm:px-5">
                   Sign in to write
                 </Link>
               )}
             </div>
-            <div className="cinema-muted mt-8 flex flex-wrap gap-5 text-sm">
+            <div className="cinema-muted mt-7 grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:mt-8 sm:flex sm:flex-wrap sm:gap-5 sm:text-sm">
               <span><strong className="cinema-text">{movies.length}</strong> films</span>
               <span><strong className="cinema-text">{reviews.length}</strong> one-liners</span>
               <span>4 writing voices · 3 choices per review</span>
