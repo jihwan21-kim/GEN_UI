@@ -44,11 +44,51 @@ export function CinemaThemeProvider({ children }: { children: ReactNode }) {
   return <CinemaThemeContext.Provider value={value}>{children}</CinemaThemeContext.Provider>;
 }
 
-export function CinemaDisplaySettings() {
+export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }) {
   const ctx = useContext(CinemaThemeContext);
   if (!ctx) return null;
+
+  if (compact) {
+    return (
+      <div className="grid gap-4">
+        <fieldset>
+          <legend className="cinema-muted mb-2 text-xs font-bold uppercase tracking-wider">Appearance</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(["dark", "light"] as Theme[]).map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={ctx.theme === value}
+                onClick={() => ctx.setTheme(value)}
+                className={`rounded-xl border px-3 py-2.5 text-sm font-bold ${ctx.theme === value ? "cinema-accent-bg" : "cinema-card"}`}
+              >
+                {value === "dark" ? "☾ Dark" : "☀ Light"}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend className="cinema-muted mb-2 text-xs font-bold uppercase tracking-wider">Colors</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {(["standard", "accessible"] as Vision[]).map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={ctx.vision === value}
+                onClick={() => ctx.setVision(value)}
+                className={`rounded-xl border px-3 py-2.5 text-sm font-bold ${ctx.vision === value ? "cinema-accent-bg" : "cinema-card"}`}
+              >
+                {value === "standard" ? "Standard" : "Color-friendly"}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Display preferences">
+    <div className="flex items-center gap-2" role="group" aria-label="Display preferences">
       <label className="sr-only" htmlFor="cinema-theme-select">Appearance</label>
       <select
         id="cinema-theme-select"
