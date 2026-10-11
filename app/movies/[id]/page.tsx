@@ -73,8 +73,8 @@ export default async function MovieDetail({
                   ))}
                 </div>
                 <p className="cinema-muted mt-6 max-w-xl text-sm leading-relaxed">
-                  Put your own experience into words. AI helps turn your thoughts into three punchy,
-                  authentic one-liners. You choose what the community sees.
+                  Find out who this film might suit and what to expect from the viewing experience.
+                  Seen it? Let AI shape your own thoughts into a useful, spoiler-free review.
                 </p>
                 {user && movie.created_by === user.id && (
                   <div className="mt-4">

@@ -21,8 +21,8 @@ export default async function LeaderboardPage() {
           <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">The community</p>
           <h1 className="mt-3 text-3xl font-black sm:text-5xl">Creator <span className="cinema-accent-text">rankings</span></h1>
           <p className="cinema-muted mt-4 max-w-2xl text-sm leading-relaxed sm:text-base">
-            Meet the people behind your favorite one-liners. Vote for the best reviews,
-            discover new creators and climb the movie leaderboard.
+            Meet the viewers helping others choose their next film. Rate useful reviews,
+            discover new perspectives and climb the movie leaderboard.
           </p>
         </header>
         {error ? (

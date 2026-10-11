@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Movie, ReviewTone, reviewTones } from "@/lib/movies";
+import { Movie, ReviewFocus, ReviewTone, reviewFocuses, reviewToneLabels, reviewTones } from "@/lib/movies";
 
 type DraftResult = { draftId: string; options: string[] };
 
@@ -14,8 +14,8 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
   const busyRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [impression, setImpression] = useState("");
-  const [tone, setTone] = useState<ReviewTone>("Witty");
-  const [spoilerFree, setSpoilerFree] = useState(true);
+  const [tone, setTone] = useState<ReviewTone>("Serious");
+  const [focus, setFocus] = useState<ReviewFocus>("Overall verdict");
   const [draft, setDraft] = useState<DraftResult | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [working, setWorking] = useState<"generate" | "publish" | null>(null);
@@ -62,7 +62,7 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
   async function generate(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
     if (busyRef.current || impression.trim().length < 20 || impression.trim().length > 5000) {
-      setMessage("Write at least 20 characters about how the movie made you feel.");
+      setMessage("Write at least 20 characters about what another viewer should know.");
       return;
     }
     busyRef.current = true;
@@ -72,7 +72,7 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
       const response = await fetch("/api/movies/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ movieId: movie.id, impression, tone, spoilerFree }),
+        body: JSON.stringify({ movieId: movie.id, impression, tone, focus }),
       });
       const result = await response.json();
       if (!response.ok) {
@@ -112,7 +112,7 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
         setMessage(result.error || "Couldn't publish this review.");
         return;
       }
-      setSuccess("Your one-liner is now published!");
+      setSuccess("Your review is published. Other viewers can now rate how helpful it is.");
       setOpen(false);
       setImpression("");
       setDraft(null);
@@ -135,7 +135,7 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
         disabled={refreshing}
         className="cinema-accent-bg inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-60"
       >
-        ✨ Write with AI
+        ✨ Create useful review
       </button>
       {success && <p aria-live="polite" role="status" className="cinema-status rounded-lg p-2 text-xs">{success}</p>}
       {open && (
@@ -155,15 +155,15 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.2em]">
-                  {draft ? "Step 2 of 2 · Choose your line" : "Step 1 of 2 · Your own thoughts"}
+                  {draft ? "Step 2 of 2 · Choose a review" : "Step 1 of 2 · Your viewing experience"}
                 </p>
                 <h2 id={`movie-composer-heading-${movie.id}`} className="mt-2 text-2xl font-bold tracking-tight">
-                  {draft ? "Pick your favorite" : "Your review, one line"}
+                  {draft ? "Which helps someone choose?" : "Help someone pick a film"}
                 </h2>
                 <p className="cinema-muted mt-2 text-sm leading-relaxed">
                   {draft
-                    ? "These three lines were written from your impressions. Only your selection will be public."
-                    : `Tell us what you really thought of ${movie.title}. AI will turn your thoughts into three punchy options.`}
+                    ? "Check that the line reflects your experience and reveals no spoilers. Only your selection will be public."
+                    : `Seen ${movie.title}? Share what worked, what didn't, and who might enjoy it. AI will draft three useful, spoiler-free options.`}
                 </p>
               </div>
               <button
@@ -188,43 +188,59 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
                   rows={6}
                   value={impression}
                   onChange={(event) => setImpression(event.target.value)}
-                  placeholder="What stayed with you? What moved you, surprised you or annoyed you? Write freely. Your original thoughts won't be shown publicly."
+                  aria-describedby={`movie-impression-help-${movie.id}`}
+                  placeholder="Example: The slow pace worked for me and the tense atmosphere kept me hooked. I'd recommend it to mystery fans, but not for a light movie night."
                   className="cinema-input w-full resize-y rounded-xl p-4 text-sm leading-relaxed"
                 />
                 <p className="cinema-muted -mt-2 text-right text-xs">{impression.length.toLocaleString()} / 5,000 characters</p>
+                <p id={`movie-impression-help-${movie.id}`} className="cinema-muted text-xs leading-relaxed">
+                  Describe the mood, pace, or a strength and drawback you noticed. Your original notes stay private.
+                </p>
                 <fieldset>
-                  <legend className="mb-2 text-sm font-semibold">Choose a voice</legend>
+                  <legend className="mb-2 text-sm font-semibold">What should the review highlight?</legend>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {reviewFocuses.map((value) => (
+                      <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold ${focus === value
+                        ? "cinema-accent-bg"
+                        : "cinema-muted-card"}`}>
+                        <input type="radio" name={`review-focus-${movie.id}`} value={value} checked={focus === value}
+                          onChange={() => setFocus(value)} className="accent-[var(--cinema-accent)]" />
+                        {value}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <fieldset>
+                  <legend className="mb-2 text-sm font-semibold">Writing style</legend>
                   <div className="flex flex-wrap gap-2">
                     {reviewTones.map((value) => (
                       <label key={value} className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold ${tone === value
                         ? "cinema-accent-bg"
                         : "cinema-muted-card"}`}>
-                        <input type="radio" name="tone" value={value} checked={tone === value}
-                          onChange={() => setTone(value)} className="sr-only" />
-                        {tone === value ? "✓ " : ""}{value}
+                        <input type="radio" name={`review-tone-${movie.id}`} value={value} checked={tone === value}
+                          onChange={() => setTone(value)} className="mr-2 accent-[var(--cinema-accent)]" />
+                        {reviewToneLabels[value]}
                       </label>
                     ))}
                   </div>
                 </fieldset>
-                <label className="cinema-muted-card flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold">
-                  <input type="checkbox" checked={spoilerFree}
-                    onChange={(event) => setSpoilerFree(event.target.checked)} />
-                  Keep it spoiler-free
-                </label>
+                <p className="cinema-muted-card rounded-xl border px-4 py-3 text-sm font-semibold">
+                  Spoiler-free by design · The AI is instructed to leave out plot reveals.
+                </p>
                 <p className="cinema-muted text-xs leading-relaxed">
-                  AI aims for 5–12 words per line (15 maximum). Your full review and unselected drafts
+                  AI aims for 8–15 words per line. Your full review and unselected drafts
                   stay private. You get 10 generations per day.
                 </p>
                 {message && <p role="alert" className="cinema-status rounded-lg p-3 text-sm">{message}</p>}
                 <button disabled={!!working || refreshing || impression.trim().length < 20}
                   className="cinema-accent-bg rounded-xl px-4 py-3 text-sm font-bold disabled:opacity-50">
-                  {working === "generate" ? "Crafting three one-liners…" : "✨ Generate 3 one-liners"}
+                  {working === "generate" ? "Drafting three useful reviews…" : "✨ Generate 3 useful reviews"}
                 </button>
               </form>
             ) : (
               <div className="mt-6 space-y-3">
                 <p className="cinema-muted text-xs font-semibold uppercase tracking-wider">
-                  {tone} · {spoilerFree ? "Spoiler-free" : "Spoilers allowed"}
+                  {focus} · {reviewToneLabels[tone]}
                 </p>
                 {draft.options.map((option, index) => (
                   <label

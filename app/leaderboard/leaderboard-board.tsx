@@ -60,7 +60,7 @@ export default function LeaderboardBoard({ authors, viewerId }: { authors: Autho
               </div>
               <div className="ml-auto min-w-[105px] text-right">
                 <p className="cinema-text text-2xl font-black">{readableCount(author[mode])}</p>
-                <p className="cinema-muted text-xs">{mode === "top_reviews" ? "movie #1s" : mode === "likes_received" ? "likes" : "published lines"}</p>
+                <p className="cinema-muted text-xs">{mode === "top_reviews" ? "movie #1s" : mode === "likes_received" ? "helpful votes" : "published lines"}</p>
               </div>
             </li>
           ))}

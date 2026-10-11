@@ -118,7 +118,7 @@ export default function MovieDetailOverlay({
               ))}
             </div>
             <p id={`film-detail-description-${movie.id}`} className="cinema-muted mt-4 max-w-xl text-sm leading-relaxed">
-              Real movie thoughts, distilled into memorable one-liners. Vote for a favorite or write your own.
+              Would this film suit your next movie night? Read viewers&apos; experiences and vote for the reviews that help you decide.
             </p>
             {userId && movie.created_by === userId && (
               <MovieForm userId={userId} movie={movie} />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews } from "@/lib/movies";
+import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, reviewToneLabels, sortMovieReviews } from "@/lib/movies";
 import { buildAuthorMap, PublicAuthor } from "@/lib/community";
 import MovieDirectory from "./movie-directory";
 import MovieForm from "./movie-form";
@@ -64,15 +64,16 @@ export default async function Home() {
           <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-5 select-none text-[12rem] leading-none text-white/[0.035] sm:text-[18rem]">✦</div>
           <div className="relative max-w-3xl">
             <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.27em]">
-              Film reviews, distilled.
+              A little insight. A better movie night.
             </p>
             <h1 className="mt-4 text-[2.45rem] font-black leading-[1.08] tracking-tight sm:mt-5 sm:text-5xl lg:text-6xl">
-              Your thoughts.<br />
-              <span className="cinema-accent-text">One unforgettable line.</span>
+              What should you watch?<br />
+              <span className="cinema-accent-text">Find out in one line.</span>
             </h1>
             <p className="cinema-muted mt-4 max-w-2xl text-[0.98rem] leading-7 sm:mt-5 sm:text-lg">
-              Write what a movie made you feel. Let AI shape your impression into
-              three sharp one-liners. Pick one, publish, and let the audience vote.
+              Discover what viewers loved, what held them back, and whether a film
+              fits your mood. Share your experience through AI-assisted reviews
+              written to help the next person choose.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:flex sm:flex-wrap sm:items-start">
               <a href="#movie-collection-title" className="cinema-accent-bg inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-bold sm:w-[180px] sm:px-5">
@@ -87,7 +88,7 @@ export default async function Home() {
             <div className="cinema-muted mt-7 grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:mt-8 sm:flex sm:flex-wrap sm:gap-5 sm:text-sm">
               <span><strong className="cinema-text">{movies.length}</strong> films</span>
               <span><strong className="cinema-text">{reviews.length}</strong> one-liners</span>
-              <span>4 writing voices · 3 choices per review</span>
+              <span>New AI drafts focus on useful insight, without spoilers</span>
             </div>
           </div>
         </section>
@@ -95,14 +96,14 @@ export default async function Home() {
         {topThisWeek && topMovie && (
           <section className="cinema-card mt-8 rounded-2xl border p-5 sm:p-7" aria-labelledby="weekly-title">
             <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.2em]">✦ Community spotlight</p>
-            <h2 id="weekly-title" className="mt-2 text-xl font-bold cinema-text">One-liner of the week</h2>
+            <h2 id="weekly-title" className="mt-2 text-xl font-bold cinema-text">Helpful review of the week</h2>
             <blockquote className="cinema-text mt-3 max-w-3xl text-lg font-semibold leading-relaxed sm:text-2xl">
               “{topThisWeek.one_liner}”
             </blockquote>
             <div className="cinema-muted mt-4 flex flex-wrap items-center gap-3 text-sm">
               <span>{topMovie.title} ({topMovie.release_year})</span>
               <span>·</span>
-              <span>{topThisWeek.tone}</span>
+              <span>{reviewToneLabels[topThisWeek.tone]}</span>
               {topThisWeek.user_id && authors[topThisWeek.user_id] && (
                 <Link href={`/u/${authors[topThisWeek.user_id].handle}`} className="cinema-accent-text font-bold hover:underline">
                   By @{authors[topThisWeek.user_id].handle}
@@ -141,7 +142,7 @@ export default async function Home() {
           />
         )}
         <footer className="cinema-muted cinema-separator mt-16 border-t pt-8 text-xs leading-relaxed">
-          Original thoughts stay private. Published one-liners are AI-assisted and reflect their authors&apos; impressions.
+          Original thoughts stay private. AI-assisted reviews reflect viewers&apos; experiences; helpfulness votes rate the review, not the film.
           Community artwork must be used with permission.
         </footer>
       </div>

@@ -1,8 +1,8 @@
 # OneLine Cinema 🎬
 
-**Your thoughts. One unforgettable line.**
+**Find your next film in one line.**
 
-A film community app built with **Next.js, Supabase Auth/Postgres/Storage, and Gemini**. Users write their **own full movie impressions** and then AI **distills those impressions**, not its own imagined review, into exactly three different, short English one-liners. The user chooses **one** to publish; the community votes it up or down.
+A film community app built with **Next.js, Supabase Auth/Postgres/Storage, and Gemini**. Users write their **own full movie impressions** and AI turns them into three short reviews that help others decide what to watch. The user chooses **one** to publish; the community rates whether it is **Helpful / Not helpful**. AI drafts are grounded in the viewer's notes, with instructions to omit spoilers and avoid invented film details.
 
 ## Branch safety
 
@@ -13,10 +13,12 @@ This is the **`feature/movie-one-liners`** branch. The existing restaurant assig
 1. Browse movies, search titles/year, and filter by genre. Click anywhere in a movie card, its poster/title, or **View all reviews** to open an accessible movie-detail overlay without leaving the page. Click outside, press Escape or the × button to close; browser deep links to `/movies/[id]` also remain available.
 2. Authenticated users add movies (title, year, 1–3 genres, optional licensed/original artwork). Only the original creator may edit or delete a movie.
 3. Select a movie and **write your own impressions** (20–5,000 characters).
-4. Pick **Witty / Serious / Poetic / Sarcastic** and whether the result must be spoiler-free (on by default).
-5. Gemini returns **exactly three distinct short one-liners**, aiming for 5–12 words, maximum 15 each, all based on the viewer's written impressions.
+4. Pick a review focus: **Overall verdict / Who it's for / Mood & pace**. The default writing style is **Straightforward** (stored as `Serious` for compatibility); Witty, Poetic and Sarcastic remain available. New drafts always use spoiler-free instructions, even if an older client sends `spoilerFree: false`.
+5. Gemini returns **exactly three distinct short reviews**, aiming for 8–15 words and capped at 160 characters each. It emphasizes viewing qualities supported by the viewer's notes, with audience suggestions only when supported. The user checks the selected draft for accuracy and spoilers before publishing.
 6. Choose **one**. Only that one-liner becomes publicly visible after clicking **Publish selected**. The original thoughts and other two suggestions remain private.
-7. Authenticated users can Like, Dislike, toggle an existing vote off, or change their vote. Public aggregate counts rank reviews by net votes.
+7. Authenticated users can mark a review **Helpful / Not helpful**, toggle an existing vote off, or change their vote. Votes rate the review's usefulness rather than the movie itself. Public aggregate counts rank reviews by net votes.
+
+This iteration requires **no additional SQL migration**: tone keys, vote values, tables and RPCs are unchanged. Existing reviews and vote totals are retained; earlier positive votes appear in Helpful counts and are included in creator rankings. Historical reviews are not rewritten or certified spoiler-free. The review focus is generation guidance, not a new public database field.
 
 No AI generation or publishing is faked or hardcoded. The optional starter movies in the SQL migration are **factual text metadata only** with original text-based placeholder artwork.
 
@@ -41,7 +43,7 @@ It creates `movie_public_profiles` with:
 - Permission to retrieve the **author's user ID** on an already-public movie review (still no access to its private draft, unpublished alternatives, voter IDs, or the author's email).
 - `movie_author_stats()`: public, aggregate-only creator metrics for creator profiles and the community leaderboard.
 
-The leaderboard has three sorts: **#1 film reviews**, **likes received**, and **published one-liners**. A #1 is a review with a *positive* net score (likes minus dislikes) tied for the highest score on its film. Ties count for each tied review. Generated alternatives that were never published do **not** count toward the published total. If someone has not chosen a public username yet, old published reviews display the fallback label "Film fan" until they complete their public profile.
+The leaderboard has three sorts: **#1 film reviews**, **helpful votes**, and **published one-liners**. A #1 is a review with a *positive* net score (Helpful minus Not helpful) tied for the highest score on its film. Ties count for each tied review. Generated alternatives that were never published do **not** count toward the published total. If someone has not chosen a public username yet, old published reviews display the fallback label "Film fan" until they complete their public profile.
 
 **Important:** Code deployment does not apply SQL migrations. Run this script manually before testing author links, editing @usernames, /u/[handle] or /leaderboard. If you rerun the core movie SQL after this migration, rerun the community SQL to regrant the safe public author column.
 
@@ -72,7 +74,7 @@ If testing Google login at a new preview domain, add `https://<your-preview-host
 - A logged-in user can add a movie and choose 1–3 genres; duplicate title/year is rejected.
 - User can write a **20–5,000-character original impression**, pick a tone, and generate three AI options.
 - Choose one option and publish. **Only the chosen option** appears publicly after refreshing. The long impression and unchosen options never appear in public data.
-- Like/Dislike persists across page refresh; repeat clicking cancels it; opposite click changes it.
+- Helpful/Not helpful persists across page refresh; repeat clicking cancels it; opposite click changes it.
 - A second user cannot edit/delete somebody else's movies, see another user's drafts, or vote as them.
 - Test proper handling of Gemini errors/quota (10 attempts per day).
 - Confirm RLS, public accessibility and deployment status from an incognito browser.
@@ -82,7 +84,7 @@ If testing Google login at a new preview domain, add `https://<your-preview-host
 1. Run both Supabase SQL scripts in order. In `/profile`, create a unique username and bio.
 2. Check `/u/<username>` in an incognito window. The bio and published reviews should show, but **not** your email, legal name, private impressions or other AI suggestions.
 3. Publish from two separate accounts and confirm bylines link to the correct public profiles. An account without a username should show the neutral "Film fan" placeholder.
-4. Vote on reviews and verify published totals, likes and positive-net film-leading reviews on both user profiles and the `/leaderboard` tabs.
+4. Vote on reviews and verify published totals, helpful votes and positive-net film-leading reviews on both user profiles and the `/leaderboard` tabs.
 5. Switch between Dark/Light and Standard/Colorblind-friendly. Confirm the movie list, detail overlay, AI editor, login and profile screens use the selected palette and voting state remains visible without relying on color.
 
 ## Privacy and rights

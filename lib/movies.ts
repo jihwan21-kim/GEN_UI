@@ -3,8 +3,16 @@ export const movieGenres = [
   "Fantasy", "Horror", "Mystery", "Romance", "Sci-Fi", "Thriller",
 ] as const;
 
-export const reviewTones = ["Witty", "Serious", "Poetic", "Sarcastic"] as const;
+export const reviewTones = ["Serious", "Witty", "Poetic", "Sarcastic"] as const;
 export type ReviewTone = (typeof reviewTones)[number];
+
+// Keep database tone values compatible with existing reviews and migrations.
+export const reviewToneLabels: Record<ReviewTone, string> = {
+  Serious: "Straightforward", Witty: "Witty", Poetic: "Poetic", Sarcastic: "Sarcastic",
+};
+
+export const reviewFocuses = ["Overall verdict", "Who it's for", "Mood & pace"] as const;
+export type ReviewFocus = (typeof reviewFocuses)[number];
 
 export type Movie = {
   id: number;

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { readableCount } from "@/lib/community";
 import { loadCommunityRankings } from "@/lib/community-server";
 import type { Movie, MovieReview, MovieScore } from "@/lib/movies";
-import { reviewScore } from "@/lib/movies";
+import { reviewScore, reviewToneLabels } from "@/lib/movies";
 import CinemaNavigation from "../../cinema-navigation";
 
 export const dynamic = "force-dynamic";
@@ -75,7 +75,7 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
           <div className="cinema-separator mt-7 grid gap-3 border-t pt-5 sm:grid-cols-3">
             {[
               { label: "Published AI lines", value: stats?.published_count ?? 0, icon: "✦" },
-              { label: "Likes received", value: stats?.likes_received ?? 0, icon: "👍" },
+              { label: "Helpful votes", value: stats?.likes_received ?? 0, icon: "👍" },
               { label: "#1 movie reviews", value: stats?.top_reviews ?? 0, icon: "🏆" },
             ].map((item) => (
               <div key={item.label} className="cinema-muted-card rounded-xl border p-4">
@@ -103,7 +103,7 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
                       <Link href={`/movies/${review.movie_id}`} className="cinema-accent-text font-bold hover:underline">
                         {movie ? `${movie.title} (${movie.release_year})` : "View film"}
                       </Link>
-                      <span className="cinema-muted text-xs">{review.tone}</span>
+                      <span className="cinema-muted text-xs">{reviewToneLabels[review.tone]}</span>
                     </div>
                     <blockquote className="cinema-text mt-3 text-base font-semibold leading-relaxed">“{review.one_liner}”</blockquote>
                     <p className="cinema-muted mt-3 text-xs">

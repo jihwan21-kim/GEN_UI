@@ -29,7 +29,7 @@ export function readableCount(value: number) {
 export type RankingSort = "top_reviews" | "likes_received" | "published_count";
 export const rankingModes: { value: RankingSort; title: string; description: string }[] = [
   { value: "top_reviews", title: "Most #1 reviews", description: "Film-leading one-liners with a positive net score" },
-  { value: "likes_received", title: "Most likes", description: "Total likes earned by published one-liners" },
+  { value: "likes_received", title: "Most helpful votes", description: "Total Helpful votes earned by published reviews, including earlier positive votes" },
   { value: "published_count", title: "Most reviews", description: "Published AI-assisted one-liners" },
 ];
 

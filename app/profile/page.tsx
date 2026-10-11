@@ -67,7 +67,7 @@ export default async function ProfilePage() {
           <div className="mt-7 grid gap-3 sm:grid-cols-4">
             {[
               { value: stats?.published_count, label: "Published AI lines", icon: "✦" },
-              { value: stats?.likes_received, label: "Likes received", icon: "👍" },
+              { value: stats?.likes_received, label: "Helpful votes", icon: "👍" },
               { value: stats?.top_reviews, label: "#1 movie reviews", icon: "🏆" },
               { value: position, label: "Leaderboard position", icon: "★", rank: true },
             ].map((item) => (

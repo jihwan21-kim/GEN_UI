@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Movie, MovieReview, MovieScore, MovieVote, reviewScore, sortMovieReviews,
+  Movie, MovieReview, MovieScore, MovieVote, reviewScore, reviewToneLabels, sortMovieReviews,
 } from "@/lib/movies";
 import MovieReviewComposer from "./movie-review-composer";
 import type { PublicAuthor } from "@/lib/community";
@@ -78,9 +78,9 @@ export default function MovieReviews({
           <h2 className={variant === "preview" ? "cinema-text text-sm font-bold" : "cinema-text text-xl font-bold"}>
             One-line reviews <span className="cinema-muted font-normal">({ranked.length})</span>
           </h2>
-          {variant === "full" && <p className="cinema-muted mt-1 text-sm">Ranked by likes minus dislikes.</p>}
+          {variant === "full" && <p className="cinema-muted mt-1 text-sm">Does this help you decide what to watch? Rate the review, not the movie. Ranked by Helpful minus Not helpful votes.</p>}
         </div>
-        {variant === "preview" && <span className="cinema-muted text-xs">Top rated</span>}
+        {variant === "preview" && <span className="cinema-muted text-xs">Top review</span>}
       </div>
       {message && <p role="status" aria-live="polite" className="cinema-status mt-2 rounded-lg p-2 text-xs">{message}</p>}
 
@@ -90,7 +90,7 @@ export default function MovieReviews({
         </p>
       ) : ranked.length === 0 ? (
         <p className="cinema-muted-card mt-3 rounded-xl border border-dashed px-4 py-5 text-sm">
-          No reviews yet. Be the first to find the perfect line.
+          No reviews yet. Seen this film? Help the next viewer decide.
         </p>
       ) : (
         <ul className={variant === "preview" ? "mt-3" : "mt-5 grid gap-3"}>
@@ -107,9 +107,9 @@ export default function MovieReviews({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="cinema-accent-text text-xs font-bold uppercase tracking-wider">
-                    {index === 0 && net > 0 ? "✦ Top one-liner" : "AI-assisted review"}
+                    {index === 0 && net > 0 ? "✦ Top helpful review" : "AI-assisted review"}
                   </span>
-                  <span className="cinema-muted text-xs">{review.tone}</span>
+                  <span className="cinema-muted text-xs">{reviewToneLabels[review.tone]}</span>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className="cinema-muted">By</span>
@@ -132,7 +132,7 @@ export default function MovieReviews({
                     <button
                       key={value}
                       type="button"
-                      aria-label={`${value === 1 ? "Like" : "Dislike"} movie review for ${movie.title}`}
+                      aria-label={`Mark review for ${movie.title} as ${value === 1 ? "helpful" : "not helpful"}`}
                       aria-pressed={selected === value}
                       title={!userId ? "Sign in to vote" : selected === value ? "Click to undo" : "Vote"}
                       onClick={() => void vote(review.id, value)}
@@ -142,7 +142,7 @@ export default function MovieReviews({
                         : "cinema-card hover:opacity-75 disabled:opacity-60"}`}
                     >
                       <span aria-hidden="true">{value === 1 ? "👍" : "👎"}</span>
-                      <span>{selected === value ? "✓ " : ""}{value === 1 ? "Like" : "Dislike"}</span>
+                      <span>{selected === value ? "✓ " : ""}{value === 1 ? "Helpful" : "Not helpful"}</span>
                       {Number(value === 1 ? score?.upvotes || 0 : score?.downvotes || 0)}
                     </button>
                   ))}
