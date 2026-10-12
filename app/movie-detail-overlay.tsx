@@ -6,6 +6,7 @@ import type { PublicAuthor } from "@/lib/community";
 import MoviePoster from "./movie-poster";
 import MovieReviews from "./movie-reviews";
 import MovieForm from "./movie-form";
+import SaveMovieButton from "./save-movie-button";
 
 export default function MovieDetailOverlay({
   movie,
@@ -120,6 +121,7 @@ export default function MovieDetailOverlay({
             <p id={`film-detail-description-${movie.id}`} className="cinema-muted mt-4 max-w-xl text-sm leading-relaxed">
               Would this film suit your next movie night? Read viewers&apos; experiences and vote for the reviews that help you decide.
             </p>
+            <SaveMovieButton movie={movie} />
             {userId && movie.created_by === userId && (
               <MovieForm userId={userId} movie={movie} />
             )}

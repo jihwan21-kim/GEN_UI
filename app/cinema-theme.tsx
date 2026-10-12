@@ -17,6 +17,7 @@ const CinemaThemeContext = createContext<ThemeContextValue | null>(null);
 export function CinemaThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
   const [vision, setVision] = useState<Vision>("standard");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -27,9 +28,11 @@ export function CinemaThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       // Browser storage is optional. The app works without it.
     }
+    setReady(true);
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
     document.documentElement.dataset.cinemaTheme = theme;
     document.documentElement.dataset.cinemaVision = vision;
     try {
@@ -38,7 +41,7 @@ export function CinemaThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       // Keep in-memory preferences when storage is blocked.
     }
-  }, [theme, vision]);
+  }, [theme, vision, ready]);
 
   const value = useMemo(() => ({ theme, vision, setTheme, setVision }), [theme, vision]);
   return <CinemaThemeContext.Provider value={value}>{children}</CinemaThemeContext.Provider>;

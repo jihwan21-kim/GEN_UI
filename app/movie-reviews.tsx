@@ -9,6 +9,7 @@ import {
 } from "@/lib/movies";
 import MovieReviewComposer from "./movie-review-composer";
 import type { PublicAuthor } from "@/lib/community";
+import { movieLoginPath } from "@/lib/movie-navigation";
 
 export default function MovieReviews({
   movie,
@@ -42,7 +43,11 @@ export default function MovieReviews({
   const counts = Object.fromEntries(scores.map((score) => [score.review_id, score]));
 
   async function vote(reviewId: string, value: 1 | -1) {
-    if (!userId || pending || refreshing) return;
+    if (!userId) {
+      router.push(movieLoginPath(movie.id));
+      return;
+    }
+    if (pending || refreshing) return;
     setMessage("");
     setPending(reviewId);
     try {
@@ -132,11 +137,11 @@ export default function MovieReviews({
                     <button
                       key={value}
                       type="button"
-                      aria-label={`Mark review for ${movie.title} as ${value === 1 ? "helpful" : "not helpful"}`}
+                      aria-label={`${!userId ? "Sign in to mark" : "Mark"} review for ${movie.title} as ${value === 1 ? "helpful" : "not helpful"}`}
                       aria-pressed={selected === value}
                       title={!userId ? "Sign in to vote" : selected === value ? "Click to undo" : "Vote"}
                       onClick={() => void vote(review.id, value)}
-                      disabled={!userId || pending !== null || refreshing}
+                      disabled={pending !== null || refreshing}
                       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors disabled:cursor-not-allowed ${selected === value
                         ? "cinema-accent-bg"
                         : "cinema-card hover:opacity-75 disabled:opacity-60"}`}
@@ -180,7 +185,7 @@ export default function MovieReviews({
         {!loadError && (userId ? (
           <MovieReviewComposer movie={movie} />
         ) : (
-          <Link href="/login" className="cinema-accent-text text-sm font-semibold hover:underline">
+          <Link href={movieLoginPath(movie.id)} className="cinema-outline inline-flex min-h-11 items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold">
             Sign in to write & vote
           </Link>
         ))}

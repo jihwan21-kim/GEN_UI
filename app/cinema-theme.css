@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --cinema-bg: #101115;
   --cinema-text: #f4f4f5;
   --cinema-muted: #bfc3cc;
@@ -19,6 +20,7 @@
 }
 
 html[data-cinema-theme="light"] {
+  color-scheme: light;
   --cinema-bg: #f6f5f1;
   --cinema-text: #20212a;
   --cinema-muted: #4e5563;

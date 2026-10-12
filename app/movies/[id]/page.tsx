@@ -6,6 +6,7 @@ import CinemaNavigation from "@/app/cinema-navigation";
 import MoviePoster from "@/app/movie-poster";
 import MovieReviews from "@/app/movie-reviews";
 import MovieForm from "@/app/movie-form";
+import SaveMovieButton from "@/app/save-movie-button";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,7 @@ export default async function MovieDetail({
                 <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.2em]">
                   Film · {movie.release_year}
                 </p>
+                <SaveMovieButton movie={movie} />
                 <h1 className="mt-3 break-words text-4xl font-black leading-tight tracking-tight sm:text-5xl">
                   {movie.title}
                 </h1>

@@ -21,8 +21,18 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
     const close = (event: PointerEvent) => {
       if (!settingsRef.current?.contains(event.target as Node)) setSettingsOpen(false);
     };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSettingsOpen(false);
+        settingsRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+      }
+    };
     document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", escape);
+    };
   }, [settingsOpen]);
 
   return (

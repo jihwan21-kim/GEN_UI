@@ -1,27 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { movieReturnPath, parseMovieId } from "@/lib/movie-navigation";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const movieId = parseMovieId(searchParams.get("film"));
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      const destination = "/";
-
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocal = process.env.NODE_ENV === "development";
-
-      if (!isLocal && forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${destination}`);
-      }
-
-      return NextResponse.redirect(`${origin}${destination}`);
+      return NextResponse.redirect(new URL(movieReturnPath(movieId), origin));
     }
   }
 
-  return NextResponse.redirect(`${origin}/login`);
+  const login = new URL("/login", origin);
+  login.searchParams.set("error", "oauth");
+  if (movieId) login.searchParams.set("film", String(movieId));
+  return NextResponse.redirect(login);
 }

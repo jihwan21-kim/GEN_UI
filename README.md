@@ -10,6 +10,16 @@ This is the **`feature/movie-one-liners`** branch. The existing restaurant assig
 
 ## Workflow
 
+### Week 5 iteration
+
+- A shorter introduction brings the film collection closer to the top of the page; smaller posters and room above the review section keep cards readable.
+- **Save film / Saved films** provides a reason to return. This shortlist is stored in the current browser, works without login, survives reloads and can be undone. It is not an account-synced Supabase feature. If storage is unavailable, the interface explains that saves last only for the current visit.
+- Logged-out voting controls lead to Google sign-in and retain the selected film. Successful sign-in still returns to the home page and reopens that film; the user then chooses their vote. The OAuth callback URL stays unchanged to preserve the existing Supabase redirect allowlist.
+- Loading, retry, not-found, empty-search and empty-saved-list states have clear next actions. Mobile display settings close on Escape. Standard and alternate palettes retain visible selected states, focus outlines and readable labels.
+- `npm test` runs isolated workflow regression tests with mocked model/database calls. `npm run test:live` checks the deployed public Supabase reads and anonymous access denials without creating database records; set `TEST_SITE_URL` to inspect a particular deployment.
+
+See [`docs/week5-review.md`](docs/week5-review.md) for the rubric review and remaining external verification.
+
 1. Browse movies, search titles/year, and filter by genre. Click anywhere in a movie card, its poster/title, or **View all reviews** to open an accessible movie-detail overlay without leaving the page. Click outside, press Escape or the × button to close; browser deep links to `/movies/[id]` also remain available.
 2. Authenticated users add movies (title, year, 1–3 genres, optional licensed/original artwork). Only the original creator may edit or delete a movie.
 3. Select a movie and **write your own impressions** (20–5,000 characters).

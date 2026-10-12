@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --test tests/workflow.test.cjs",
+    "test:live": "node tests/live-audit.cjs",
     "lint": "eslint"
   },
   "dependencies": {

@@ -207,7 +207,7 @@ export default function MovieForm({
                     checked={genres.includes(genre)}
                     disabled={!genres.includes(genre) && genres.length >= 3}
                     onChange={() => toggleGenre(genre)}
-                    className="sr-only"
+                    className="mr-1.5 accent-[var(--cinema-accent)]"
                   />
                   {genres.includes(genre) ? "✓ " : ""}{genre}
                 </label>

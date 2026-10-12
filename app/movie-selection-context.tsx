@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Movie } from "@/lib/movies";
+import { parseMovieId, returnMovieStorageKey } from "@/lib/movie-navigation";
 
 type MovieSelection = {
   newlyAddedMovie: Movie | null;
@@ -20,9 +21,19 @@ const MovieSelectionContext = createContext<MovieSelection | null>(null);
  * detail overlay used by cards, without navigating or waiting for a
  * Supabase server refresh. Direct-link movie pages can omit the provider.
  */
-export function MovieSelectionProvider({ children }: { children: ReactNode }) {
+export function MovieSelectionProvider({ children, initialMovieId = null }: { children: ReactNode; initialMovieId?: number | null }) {
   const [newlyAddedMovie, setNewlyAddedMovie] = useState<Movie | null>(null);
-  const [openMovieId, setOpenMovieId] = useState<number | null>(null);
+  const [openMovieId, setOpenMovieId] = useState<number | null>(initialMovieId);
+
+  useEffect(() => {
+    try {
+      const returnedId = parseMovieId(sessionStorage.getItem(returnMovieStorageKey));
+      sessionStorage.removeItem(returnMovieStorageKey);
+      if (!initialMovieId && returnedId) setOpenMovieId(returnedId);
+    } catch {
+      // Browsing and direct film links work when storage is unavailable.
+    }
+  }, [initialMovieId]);
 
   const showMovie = useCallback((id: number) => setOpenMovieId(id), []);
   const closeMovie = useCallback(() => setOpenMovieId(null), []);
