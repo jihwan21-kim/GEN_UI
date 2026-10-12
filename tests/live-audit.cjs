@@ -52,8 +52,16 @@ const site = (process.env.TEST_SITE_URL || 'https://gen-ui-git-feature-movie-one
   }
   for (const route of ['/profile', '/private']) {
     const response = await fetch(site + route, { redirect: 'manual' });
-    assert.equal(response.status, 307);
-    assert.equal(response.headers.get('location'), '/login');
+    if (response.status === 307) {
+      assert.equal(response.headers.get('location'), '/login');
+    } else {
+      // A loading boundary starts streaming before the server discovers
+      // the anonymous session. Next.js then sends a same-origin meta redirect.
+      assert.equal(response.status, 200);
+      const html = await response.text();
+      assert(/<meta\b[^>]*http-equiv="refresh"[^>]*content="[01];url=\/login"/.test(html), `${route} lacks a login redirect`);
+      assert(html.includes('NEXT_REDIRECT;replace;/login;307;'));
+    }
     console.log(`PASS ${route} redirects anonymous visitors`);
   }
   for (const route of ['/api/movies/generate', '/api/movies/publish']) {
