@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Movie, MovieReview, MovieScore, MovieVote, reviewScore, reviewToneLabels, sortMovieReviews } from "@/lib/movies";
 import { buildAuthorMap, PublicAuthor } from "@/lib/community";
@@ -8,6 +9,7 @@ import MovieSpotlightLink from "./movie-spotlight-link";
 import CinemaNavigation from "./cinema-navigation";
 import { MovieSelectionProvider } from "./movie-selection-context";
 import { parseMovieId } from "@/lib/movie-navigation";
+import { signInDestination } from "@/lib/profile-onboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ f
   const initialMovieId = parseMovieId((await searchParams).film);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const destination = await signInDestination(supabase, user.id, initialMovieId);
+    if (destination.startsWith("/profile")) redirect(destination);
+  }
   const [moviesResult, reviewsResult, scoresResult, votesResult, authorsResult] = await Promise.all([
     supabase.from("movies")
       .select("id, title, release_year, genres, poster_path, created_by, created_at")

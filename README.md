@@ -14,7 +14,8 @@ This is the **`feature/movie-one-liners`** branch. The existing restaurant assig
 
 - A shorter introduction brings the film collection closer to the top of the page; smaller posters and room above the review section keep cards readable.
 - **Save film / Saved films** provides a reason to return. This shortlist is stored in the current browser, works without login, survives reloads and can be undone. It is not an account-synced Supabase feature. If storage is unavailable, the interface explains that saves last only for the current visit.
-- Logged-out voting controls lead to Google sign-in and retain the selected film. Successful sign-in still returns to the home page and reopens that film; the user then chooses their vote. The OAuth callback URL stays unchanged to preserve the existing Supabase redirect allowlist.
+- Logged-out voting controls lead to Google sign-in and retain the selected film. Once profile setup is complete, sign-in returns to the home page and reopens that film; the user then chooses their vote. The OAuth callback URL stays unchanged to preserve the existing Supabase redirect allowlist.
+- Accounts without a first name, last name, or public @username go to **Set up your profile** after sign-in. Their signed-in home-page access also returns to setup until those fields are complete. **Save and continue to films** sends them home after both profile records save successfully; future sign-ins return directly to films. An existing completed profile can still be edited without leaving the profile page.
 - Loading, retry, not-found, empty-search and empty-saved-list states have clear next actions. Mobile display settings close on Escape. Standard and alternate palettes retain visible selected states, focus outlines and readable labels.
 - `npm test` runs isolated workflow regression tests with mocked model/database calls. `npm run test:live` checks the deployed public Supabase reads and anonymous access denials without creating database records; set `TEST_SITE_URL` to inspect a particular deployment.
 
@@ -80,7 +81,7 @@ If testing Google login at a new preview domain, add `https://<your-preview-host
 ### 3. Verify
 
 - Logged-out visitor can browse movies/reviews but cannot generate or vote.
-- Google login redirects back to the movie version.
+- Google login sends an incomplete account to profile setup; saving a valid name and @username returns home. Completed accounts return directly to the movie version. Failed saves remain on setup.
 - A logged-in user can add a movie and choose 1–3 genres; duplicate title/year is rejected.
 - User can write a **20–5,000-character original impression**, pick a tone, and generate three AI options.
 - Choose one option and publish. **Only the chosen option** appears publicly after refreshing. The long impression and unchosen options never appear in public data.

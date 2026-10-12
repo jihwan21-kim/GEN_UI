@@ -54,7 +54,8 @@ export default function LoginForm({ movieId, callbackFailed = false }: { movieId
               Sign in with Google to create a useful AI-assisted review and rate the
               insights that help you choose a film.
             </p>
-            {movieId && <p className="cinema-status mt-3 rounded-xl p-3 text-sm">After sign-in, we&apos;ll reopen your selected film on the home page.</p>}
+            <p className="cinema-muted mt-3 text-xs leading-relaxed">New here? You&apos;ll set up your name and @username first.</p>
+            {movieId && <p className="cinema-status mt-3 rounded-xl p-3 text-sm">Once your profile is ready, we&apos;ll reopen your selected film on the home page.</p>}
 
             <button
               type="button"

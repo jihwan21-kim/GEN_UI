@@ -5,10 +5,13 @@ import { rankAuthors, readableCount } from "@/lib/community";
 import { loadCommunityRankings } from "@/lib/community-server";
 import CinemaNavigation from "../cinema-navigation";
 import ProfileForm from "./profile-form";
+import { hasCompleteProfile } from "@/lib/profile-onboarding";
+import { parseMovieId } from "@/lib/movie-navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ film?: string | string[] }> }) {
+  const movieId = parseMovieId((await searchParams).film);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -33,7 +36,7 @@ export default async function ProfilePage() {
     ? rankAuthors(rankings.filter((entry) => Number(entry.published_count) > 0), "top_reviews")
         .findIndex((entry) => entry.user_id === user.id) + 1
     : null;
-  const needsProfile = !profile?.first_name?.trim() || !profile?.last_name?.trim();
+  const needsProfile = !hasCompleteProfile(profile, publicProfile);
   const communityNotReady = Boolean(publicProfileResult.error || rankingResult.error);
 
   return (
@@ -45,10 +48,10 @@ export default async function ProfilePage() {
             OneLine Cinema / Account
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-            Your <span className="cinema-accent-text">profile</span>
+            {needsProfile ? "Set up your" : "Your"} <span className="cinema-accent-text">profile</span>
           </h1>
           <p className="cinema-muted mt-3 text-sm leading-relaxed">
-            Create your public @username, share a little about yourself, and track your movie-review achievements.
+            {needsProfile ? "Add your name and choose a unique @username to finish signing in. Your name stays private; your @username appears beside your reviews." : "Update your public @username, share a little about yourself, and track your movie-review achievements."}
           </p>
 
           {communityNotReady && (
@@ -64,7 +67,7 @@ export default async function ProfilePage() {
             </p>
           )}
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-4">
+          {!needsProfile && <><div className="mt-7 grid gap-3 sm:grid-cols-4">
             {[
               { value: stats?.published_count, label: "Published AI lines", icon: "✦" },
               { value: stats?.likes_received, label: "Helpful votes", icon: "👍" },
@@ -82,10 +85,12 @@ export default async function ProfilePage() {
           </div>
           <p className="cinema-muted mt-2 text-xs">
             Counts include published reviews only, even if you have not created a public username. A #1 review has the highest positive net vote score for its movie; ties count.
-          </p>
+          </p></>}
 
           <div className="cinema-card mt-8 rounded-3xl border p-5 shadow-xl sm:p-8">
             <ProfileForm
+              onboarding={needsProfile}
+              returnMovieId={movieId}
               userId={user.id}
               email={user.email ?? ""}
               initialFirstName={profile?.first_name ?? ""}

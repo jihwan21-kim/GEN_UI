@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { movieReturnPath } from "@/lib/movie-navigation";
 
 type ProfileFormProps = {
   userId: string;
@@ -13,6 +14,8 @@ type ProfileFormProps = {
   initialAvatarUrl: string;
   initialHandle: string;
   initialBio: string;
+  onboarding?: boolean;
+  returnMovieId?: number | null;
 };
 
 export default function ProfileForm({
@@ -23,6 +26,8 @@ export default function ProfileForm({
   initialAvatarUrl,
   initialHandle,
   initialBio,
+  onboarding = false,
+  returnMovieId = null,
 }: ProfileFormProps) {
   const router = useRouter();
   const [firstName, setFirstName] = useState(initialFirstName);
@@ -39,6 +44,11 @@ export default function ProfileForm({
     event.preventDefault();
     if (isSaving) return;
     setStatus("");
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setStatus("Enter your first and last name before continuing.");
+      return;
+    }
 
     const normalizedHandle = handle.toLowerCase().trim().replace(/^@/, "");
     if (!/^[a-z][a-z0-9_]{2,19}$/.test(normalizedHandle)
@@ -128,6 +138,7 @@ export default function ProfileForm({
       setAvatarUrl(nextAvatarUrl);
       setPhoto(null);
       setStatus("Profile saved. Your @username and bio are public.");
+      if (onboarding) router.replace(movieReturnPath(returnMovieId));
       router.refresh();
     } catch {
       setStatus("Could not save the profile. Please try again.");
@@ -144,6 +155,30 @@ export default function ProfileForm({
         <p className="cinema-muted mt-1 text-xs">Your email and first/last names are not shown on public profiles.</p>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="cinema-text text-sm font-medium">
+          First name (private)
+          <input
+            value={firstName}
+            onChange={(event) => setFirstName(event.target.value)}
+            required
+            className="cinema-input mt-2 w-full rounded-xl px-4 py-3"
+            placeholder="First name"
+          />
+        </label>
+        <label className="cinema-text text-sm font-medium">
+          Last name (private)
+          <input
+            value={lastName}
+            onChange={(event) => setLastName(event.target.value)}
+            required
+            className="cinema-input mt-2 w-full rounded-xl px-4 py-3"
+            placeholder="Last name"
+          />
+        </label>
+      </div>
+
+
       <div className="flex flex-wrap items-center gap-5">
         <div
           aria-label="Profile photo"
@@ -157,7 +192,7 @@ export default function ProfileForm({
           )}
         </div>
         <label className="cinema-text block min-w-0 flex-1 text-sm font-medium">
-          Profile photo <span className="cinema-muted">(public)</span>
+          Profile photo <span className="cinema-muted">(optional, public)</span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
@@ -192,7 +227,7 @@ export default function ProfileForm({
           <span className="cinema-muted mt-1 block text-xs">3–20 characters. Lowercase letters, numbers and underscores. Changing this also changes your public profile URL.</span>
         </label>
         <label className="cinema-text text-sm font-medium">
-          About me (public)
+          About me (optional, public)
           <textarea
             value={bio}
             onChange={(event) => setBio(event.target.value)}
@@ -210,32 +245,10 @@ export default function ProfileForm({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="cinema-text text-sm font-medium">
-          First name (private)
-          <input
-            value={firstName}
-            onChange={(event) => setFirstName(event.target.value)}
-            required
-            className="cinema-input mt-2 w-full rounded-xl px-4 py-3"
-            placeholder="First name"
-          />
-        </label>
-        <label className="cinema-text text-sm font-medium">
-          Last name (private)
-          <input
-            value={lastName}
-            onChange={(event) => setLastName(event.target.value)}
-            required
-            className="cinema-input mt-2 w-full rounded-xl px-4 py-3"
-            placeholder="Last name"
-          />
-        </label>
-      </div>
 
       <button type="submit" disabled={isSaving}
         className="cinema-accent-bg min-h-12 rounded-xl px-5 py-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60">
-        {isSaving ? "Saving…" : "Save profile"}
+        {isSaving ? "Saving…" : onboarding ? "Save and continue to films →" : "Save profile"}
       </button>
       {status && <p role="status" className="cinema-status rounded-xl p-3 text-sm">{status}</p>}
     </form>

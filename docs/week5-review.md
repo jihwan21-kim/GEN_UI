@@ -6,6 +6,10 @@ Prepared October 11, 2026. This records implemented behavior and verification; i
 
 Help someone decide what to watch with brief AI-assisted reviews grounded in viewers' own notes. Authors choose Overall verdict, Who it's for, or Mood & pace and publish one of three generated alternatives. Other visitors evaluate review usefulness with Helpful / Not helpful. A browser-local saved-film shortlist lets visitors return to their next movie-night choices.
 
+## Profile setup after sign-in
+
+The owner requested profile setup before a new account enters the app. Google sign-in now checks for a first name, last name and public @username on the server. Incomplete accounts go to Set up your profile; their signed-in home-page access also returns to setup. Saving both profile records successfully continues to films and preserves the selected-film context. Failed saves stay on setup. Completed accounts return directly to films on future sign-ins and can edit their profile without being sent away.
+
 ## Feedback addressed
 
 The app owner previously reported unclear mobile navigation, faint active tabs, oversized posters, cramped spacing above review cards, and a missing creator ranking. Existing navigation/ranking fixes were reviewed. This iteration makes the introduction compact, reduces poster widths, adds review-section breathing room, preserves high-contrast selected tabs, and keeps published authors in rankings even without an @username.
@@ -29,7 +33,7 @@ No Product Manager or Feedback Group comments were supplied in this conversation
 ## Checks
 
 - Next.js production build and TypeScript check passed.
-- Eight isolated workflow tests pass: origin/auth/quota gates; all focus modes and spoiler-free instructions; invalid generation rejection; stored-choice publish contract; same-origin sign-in return; sign-out; saved-list parsing; vote insertion/switch/cancellation.
+- Ten isolated workflow tests pass: origin/auth/quota gates; all focus modes and spoiler-free instructions; invalid generation rejection; stored-choice publish contract; incomplete-profile setup and completed-profile safe return; sign-out; saved-list parsing; vote insertion/switch/cancellation; profile completeness; failed/successful onboarding saves.
 - Live Supabase audit passes for public reads, aggregate scores, private draft/voter/quota access denial, private draft-link denial, and authentication-protected RPCs. No database records were created or changed.
 - /profile and /private redirect anonymous visitors to /login. Generation and publish endpoints return 401 for anonymous same-origin requests and 403 for cross-origin requests.
 - Main card text, muted text and active button labels meet a computed 4.5:1 contrast minimum in dark, light and both alternate palettes (lowest measured ratio: 5.85:1). This is a targeted check, not full accessibility certification.
@@ -39,7 +43,7 @@ No Product Manager or Feedback Group comments were supplied in this conversation
 1. Open the final commit-specific public URL without Vercel login.
 2. Search a title, choose a genre and open a film. Read a short AI-assisted review.
 3. Save the film, switch to Saved films, reload, and remove the save.
-4. Sign in with Google. From an existing film, choose Create useful review.
+4. Sign in with Google. If prompted, save your name and @username to finish profile setup. From an existing film, choose Create useful review.
 5. Write a real viewing impression, choose a focus, generate three alternatives, check for accuracy/spoilers, and publish one.
 6. Mark a review Helpful, change to Not helpful, click again to remove, and reload after each step to confirm stored counts.
 7. Check profile/rankings, sign out, and verify that a new generation or vote requires sign-in.

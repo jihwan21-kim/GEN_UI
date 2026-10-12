@@ -117,18 +117,33 @@ test('publishing rejects untrusted choices and delegates the stored candidate to
   assert.equal(JSON.stringify(rpcArgs), JSON.stringify({ p_draft_id: body.draftId, p_selection: 1 }));
 });
 
-test('login returns only to the same-origin home and a validated selected film', async () => {
+test('login chooses profile setup for incomplete accounts and safe home return for completed accounts', async () => {
   const navigation = load('lib/movie-navigation.ts');
   for (const value of [null, [], '-1', '0', '1.5', '//other.test', '9007199254740992']) assert.equal(navigation.parseMovieId(value), null);
-  let failure = false;
+  let failure = false, complete = true, lookupFailed = false;
+  const db = {
+    auth: { exchangeCodeForSession: async () => ({ data: { user: { id: 'viewer-a' } }, error: failure ? new Error('failed') : null }) },
+    from(table) {
+      return { select() { return this; }, eq(key, value) { assert.equal(value, 'viewer-a'); return this; },
+        maybeSingle: async () => ({ data: table === 'profiles' ? { first_name: 'Test', last_name: 'Viewer' } : complete ? { handle: 'movie_fan' } : null, error: lookupFailed ? new Error('lookup failed') : null }) };
+    },
+  };
   const route = load('app/auth/callback/route.ts', {
     'next/server': { NextResponse: { redirect: url => Response.redirect(url, 307) } },
-    '@/lib/supabase/server': { createClient: async () => ({ auth: { exchangeCodeForSession: async () => ({ error: failure ? new Error('failed') : null }) } }) },
+    '@/lib/supabase/server': { createClient: async () => db },
   });
   let response = await route.GET(new Request('https://cinema.test/auth/callback?code=test&film=7', { headers: { 'x-forwarded-host': 'other.test' } }));
   assert.equal(response.headers.get('location'), 'https://cinema.test/?film=7');
   response = await route.GET(new Request('https://cinema.test/auth/callback?code=test&film=//other.test'));
   assert.equal(response.headers.get('location'), 'https://cinema.test/');
+  complete = false;
+  response = await route.GET(new Request('https://cinema.test/auth/callback?code=test&film=7'));
+  assert.equal(response.headers.get('location'), 'https://cinema.test/profile?film=7');
+  response = await route.GET(new Request('https://cinema.test/auth/callback?code=test'));
+  assert.equal(response.headers.get('location'), 'https://cinema.test/profile');
+  complete = true; lookupFailed = true;
+  response = await route.GET(new Request('https://cinema.test/auth/callback?code=test'));
+  assert.equal(response.headers.get('location'), 'https://cinema.test/profile');
   failure = true;
   response = await route.GET(new Request('https://cinema.test/auth/callback?code=test&film=7'));
   assert.equal(response.headers.get('location'), 'https://cinema.test/login?error=oauth&film=7');
@@ -209,4 +224,49 @@ test('rendered Helpful controls insert, switch, cancel and preserve another vote
   assert.equal(refreshes, 3);
   await click(1, null); assert.equal(navigated, '/login?film=7');
   assert.equal(rows.length, 1);
+});
+
+test('profile completeness requires both names and a public username', () => {
+  const { hasCompleteProfile } = load('lib/profile-onboarding.ts');
+  assert.equal(hasCompleteProfile({ first_name: 'Test', last_name: 'Viewer' }, { handle: 'movie_fan' }), true);
+  for (const [profile, publicProfile] of [[null, null], [{ first_name: 'Test', last_name: 'Viewer' }, null], [{ first_name: ' ', last_name: 'Viewer' }, { handle: 'movie_fan' }], [{ first_name: 'Test', last_name: '' }, { handle: 'movie_fan' }]]) {
+    assert.equal(hasCompleteProfile(profile, publicProfile), false);
+  }
+});
+
+test('profile onboarding requires names, stays after a failed save, and continues only after both records save', async () => {
+  const React = require('react');
+  const hooks = [], writes = [];
+  let cursor = 0, privateFailure = true, nextPath, refreshes = 0, publicExists = false;
+  const component = load('app/profile/profile-form.tsx', {
+    react: { ...React, useState(initial) { const i = cursor++; if (!(i in hooks)) hooks[i] = initial; return [hooks[i], value => { hooks[i] = typeof value === 'function' ? value(hooks[i]) : value; }]; } },
+    'next/link': props => props.children,
+    'next/navigation': { useRouter: () => ({ replace: path => { nextPath = path; }, refresh: () => refreshes++ }) },
+    '@/lib/supabase/client': { createClient: () => ({ from(table) {
+      return {
+        select() { return this; }, eq(key, value) { assert.equal(value, 'viewer-a'); return this; },
+        maybeSingle: async () => ({ data: publicExists ? { user_id: 'viewer-a' } : null, error: null }),
+        insert(data) { writes.push({ table, data }); publicExists = true; return Promise.resolve({ error: null }); },
+        update(data) { writes.push({ table, data }); return { eq: async (key, value) => { assert.equal(value, 'viewer-a'); return { error: null }; } }; },
+        upsert(data) { writes.push({ table, data }); return Promise.resolve({ error: privateFailure ? { message: 'test failure' } : null }); },
+      };
+    } }) },
+  }).default;
+  const props = { userId: 'viewer-a', email: 'test@example.invalid', initialFirstName: '', initialLastName: '', initialHandle: '', initialBio: '', initialAvatarUrl: '', onboarding: true, returnMovieId: 7 };
+  function draw() { cursor = 0; return component(props); }
+  async function submit() { await draw().props.onSubmit({ preventDefault() {} }); }
+  function fill(placeholder, value) {
+    const input = descendants(draw(), node => node.type === 'input' && node.props.placeholder === placeholder)[0];
+    assert(input); input.props.onChange({ target: { value } });
+  }
+  await submit(); assert.equal(writes.length, 0); assert.equal(nextPath, undefined);
+  fill('First name', 'Test'); fill('Last name', 'Viewer'); fill('movie_fan', 'movie_fan');
+  await submit(); assert.equal(nextPath, undefined); assert.equal(refreshes, 0);
+  privateFailure = false;
+  await submit(); assert.equal(nextPath, '/?film=7'); assert.equal(refreshes, 1);
+  assert.equal(writes.at(-1).table, 'profiles'); assert.equal(writes.at(-1).data.first_name, 'Test');
+  assert.equal(writes.at(-1).data.last_name, 'Viewer');
+  props.onboarding = false;
+  nextPath = undefined;
+  await submit(); assert.equal(nextPath, undefined); assert.equal(refreshes, 2);
 });
