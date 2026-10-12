@@ -50,6 +50,9 @@ export default function MoviePoster({
       // their own space. Allow wrapping inside long, unbroken movie titles.
       let low = 4;
       let high = Math.min(34, poster.clientWidth * 0.2);
+      // Measure whole words so narrow posters shrink "Interstellar" rather
+      // than choosing a larger font that splits it into "Interstell / ar".
+      title.style.overflowWrap = "normal";
       for (let i = 0; i < 12; i += 1) {
         const mid = (low + high) / 2;
         title.style.fontSize = `${mid}px`;
@@ -61,6 +64,8 @@ export default function MoviePoster({
       }
       // A little breathing room for late-loading fonts and font rounding.
       title.style.fontSize = `${Math.max(4, low - 0.4)}px`;
+      // Retain a fallback for unusually long titles without any spaces.
+      title.style.overflowWrap = "anywhere";
     }
 
     const scheduleFit = () => {
