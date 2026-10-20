@@ -17,8 +17,8 @@ export default async function LeaderboardPage() {
     <main className="cinema-app cinema-page pb-20">
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn={Boolean(user)} />
-        <div className="mx-auto max-w-5xl">
-        <header className="mt-12">
+        <div className="max-w-5xl">
+        <header className="mt-5 sm:mt-7">
           <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">The community</p>
           <h1 className="mt-3 text-3xl font-black sm:text-5xl">Creator <span className="cinema-accent-text">rankings</span></h1>
           <p className="cinema-muted mt-4 max-w-2xl text-sm leading-relaxed sm:text-base">

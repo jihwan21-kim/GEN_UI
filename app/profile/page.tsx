@@ -43,8 +43,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     <main className="cinema-app cinema-page">
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn />
-        <div className="mx-auto max-w-5xl">
-        <section className="mx-auto mt-10 max-w-3xl sm:mt-14">
+        <div className="max-w-5xl">
+        <section className="mt-5 max-w-3xl sm:mt-7">
           <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">
             OneLine Cinema / Account
           </p>
