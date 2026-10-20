@@ -177,7 +177,7 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
             {!draft ? (
               <form onSubmit={generate} className="mt-6 grid gap-4">
                 <label htmlFor={`movie-impression-${movie.id}`} className="text-sm font-semibold">
-                  Your thoughts <span className="cinema-muted font-normal">(private)</span>
+                  Your thoughts <span className="cinema-muted font-normal">(private · minimum 20 characters)</span>
                 </label>
                 <textarea
                   id={`movie-impression-${movie.id}`}

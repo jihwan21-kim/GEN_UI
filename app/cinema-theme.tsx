@@ -91,29 +91,39 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
   }
 
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Display preferences">
-      <label className="sr-only" htmlFor="cinema-theme-select">Appearance</label>
-      <select
-        id="cinema-theme-select"
-        aria-label="Appearance: dark or light"
-        value={ctx.theme}
-        onChange={(event) => ctx.setTheme(event.target.value as Theme)}
-        className="cinema-display-select rounded-lg px-2.5 py-2 text-xs font-semibold"
-      >
-        <option value="dark">☾ Dark</option>
-        <option value="light">☀ Light</option>
-      </select>
-      <label className="sr-only" htmlFor="cinema-vision-select">Color accessibility</label>
-      <select
-        id="cinema-vision-select"
-        aria-label="Color accessibility"
-        value={ctx.vision}
-        onChange={(event) => ctx.setVision(event.target.value as Vision)}
-        className="cinema-display-select rounded-lg px-2.5 py-2 text-xs font-semibold"
-      >
-        <option value="standard">Standard colors</option>
-        <option value="accessible">◉ Colorblind-friendly</option>
-      </select>
+    <div className="flex flex-wrap items-center justify-end gap-2" role="group" aria-label="Display preferences">
+      <div className="relative">
+        <label className="sr-only" htmlFor="cinema-theme-select">Appearance</label>
+        <select
+          id="cinema-theme-select"
+          aria-label="Appearance: dark or light"
+          value={ctx.theme}
+          onChange={(event) => ctx.setTheme(event.target.value as Theme)}
+          className="cinema-display-select min-h-10 appearance-none rounded-lg py-2 pl-3 pr-9 text-xs font-semibold"
+        >
+          <option value="dark">☾ Dark</option>
+          <option value="light">☀ Light</option>
+        </select>
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2">
+          <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        </svg>
+      </div>
+      <div className="relative">
+        <label className="sr-only" htmlFor="cinema-vision-select">Color accessibility</label>
+        <select
+          id="cinema-vision-select"
+          aria-label="Color accessibility"
+          value={ctx.vision}
+          onChange={(event) => ctx.setVision(event.target.value as Vision)}
+          className="cinema-display-select min-h-10 appearance-none rounded-lg py-2 pl-3 pr-9 text-xs font-semibold"
+        >
+          <option value="standard">Standard colors</option>
+          <option value="accessible">◉ Colorblind-friendly</option>
+        </select>
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2">
+          <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        </svg>
+      </div>
     </div>
   );
 }
