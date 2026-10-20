@@ -43,15 +43,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     <main className="cinema-app cinema-page">
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn />
-        <div className="max-w-5xl">
-        <section className="mt-5 max-w-3xl sm:mt-7">
+        <section className="mt-5 max-w-6xl sm:mt-7">
           <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">
             OneLine Cinema / Account
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
             {needsProfile ? "Set up your" : "Your"} <span className="cinema-accent-text">profile</span>
           </h1>
-          <p className="cinema-muted mt-3 text-sm leading-relaxed">
+          <p className="cinema-muted mt-3 max-w-3xl text-sm leading-relaxed">
             {needsProfile ? "Add your name and choose a unique @username to finish signing in. Your name stays private; your @username appears beside your reviews." : "Update your public @username, share a little about yourself, and track your movie-review achievements."}
           </p>
 
@@ -106,7 +105,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             <Link href="/" className="cinema-muted hover:underline">← Back to movie collection</Link>
           </div>
         </section>
-        </div>
       </div>
     </main>
   );
