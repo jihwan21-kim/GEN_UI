@@ -48,9 +48,10 @@ export default async function MovieDetail({
   const authors = buildAuthorMap((authorsResult.data || []) as PublicAuthor[]);
 
   return (
-    <main className="cinema-app cinema-page px-5 py-8 sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-5xl">
+    <main className="cinema-app cinema-page">
+      <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn={Boolean(user)} />
+        <div className="mx-auto max-w-5xl">
         {movieResult.error || !movie ? (
           <p role="alert" className="rounded-xl border border-red-300/40 bg-red-950/40 p-5 text-red-100">
             Could not load this movie. Please check database setup.
@@ -98,6 +99,7 @@ export default async function MovieDetail({
             </div>
           </>
         )}
+        </div>
       </div>
     </main>
   );

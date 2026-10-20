@@ -40,9 +40,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const communityNotReady = Boolean(publicProfileResult.error || rankingResult.error);
 
   return (
-    <main className="cinema-app cinema-page px-5 py-8 sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-5xl">
+    <main className="cinema-app cinema-page">
+      <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn />
+        <div className="mx-auto max-w-5xl">
         <section className="mx-auto mt-10 max-w-3xl sm:mt-14">
           <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em]">
             OneLine Cinema / Account
@@ -105,6 +106,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             <Link href="/" className="cinema-muted hover:underline">← Back to movie collection</Link>
           </div>
         </section>
+        </div>
       </div>
     </main>
   );

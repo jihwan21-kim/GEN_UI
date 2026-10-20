@@ -45,9 +45,10 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
   const stats = allStats.find((entry) => entry.user_id === author.user_id);
 
   return (
-    <main className="cinema-app cinema-page px-5 py-8 pb-20 sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-5xl">
+    <main className="cinema-app cinema-page pb-20">
+      <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn={Boolean(user)} />
+        <div className="mx-auto max-w-5xl">
         <div className="mt-10">
           <Link href="/leaderboard" className="cinema-accent-text text-sm font-bold hover:underline">← Creator rankings</Link>
         </div>
@@ -117,6 +118,7 @@ export default async function PublicCreatorPage({ params }: { params: Promise<{ 
             <p className="cinema-muted-card mt-5 rounded-2xl border p-6 text-sm">No published one-liners yet.</p>
           )}
         </section>
+        </div>
       </div>
     </main>
   );
