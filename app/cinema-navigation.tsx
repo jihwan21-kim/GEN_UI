@@ -14,14 +14,14 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
 
   return (
     <nav aria-label="Main navigation">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-5 lg:gap-8">
         <Link href="/" aria-label="OneLine Cinema home" className="inline-flex min-w-0 items-center gap-2.5 font-black tracking-tight cinema-text">
           <span className="cinema-accent-bg flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl" aria-hidden="true">✦</span>
           <span className="truncate text-base sm:text-lg">OneLine <span className="cinema-accent-text">Cinema</span></span>
         </Link>
 
-        <div className="hidden flex-col items-end gap-3 lg:flex">
-          <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="hidden flex-col items-start gap-3 lg:flex">
+          <div className="flex flex-wrap items-center justify-start gap-2">
             {tabs.map((tab) => (
               <Link
                 key={tab.href}
@@ -64,7 +64,7 @@ export default function CinemaNavigation({ signedIn = false }: { signedIn?: bool
             <Link href="/login" className="cinema-outline flex min-h-11 min-w-0 items-center justify-center rounded-xl px-1 py-2.5 text-xs font-bold sm:px-3 sm:text-sm">Sign in</Link>
           )}
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <CinemaDisplaySettings />
         </div>
       </div>
