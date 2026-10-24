@@ -17,6 +17,8 @@ export async function signInDestination(
   userId: string,
   movieId: number | null,
 ) {
+  const {data:allowed,error:allowError}=await supabase.rpc('cinema_member_allowed');
+  if(allowError||!allowed)return '/login?error=not_allowed';
   const [profile, publicProfile] = await Promise.all([
     supabase.from("profiles").select("first_name, last_name").eq("id", userId).maybeSingle(),
     supabase.from("movie_public_profiles").select("handle").eq("user_id", userId).maybeSingle(),
