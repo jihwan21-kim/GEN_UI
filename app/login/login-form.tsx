@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import CinemaNavigation from "../cinema-navigation";
 import { movieReturnPath, returnMovieStorageKey } from "@/lib/movie-navigation";
 
-export default function LoginForm({ movieId, callbackFailed = false }: { movieId: number | null; callbackFailed?: boolean }) {
-  const [errorMessage, setErrorMessage] = useState(callbackFailed ? "Sign-in could not be completed. Please try again." : "");
+export default function LoginForm({ movieId, callbackFailed = false, accessDenied = false }: { movieId: number | null; callbackFailed?: boolean; accessDenied?: boolean }) {
+  const [errorMessage, setErrorMessage] = useState(accessDenied ? "This Google account is not approved for sign-up. Please contact the site administrator." : callbackFailed ? "Sign-in could not be completed. Please try again." : "");
   const [isLoading, setIsLoading] = useState(false);
 
   async function signInWithGoogle() {
