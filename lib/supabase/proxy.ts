@@ -32,6 +32,22 @@ export async function updateSession(request: NextRequest) {
   );
 
   await supabase.auth.getClaims();
-
+  const path=request.nextUrl.pathname;
+  if (!path.startsWith('/auth/') && path!=='/login') {
+    const {data:{user}}=await supabase.auth.getUser();
+    if(user){
+      const {data:allowed,error}=await supabase.rpc('cinema_member_allowed');
+      if(error||!allowed){
+        await supabase.auth.signOut();
+        if(path.startsWith('/api/'))return NextResponse.json({error:'Email is not approved for access'},{status:403});
+        const url=request.nextUrl.clone();
+        url.pathname='/login';
+        url.search='?error=not_allowed';
+        const response=NextResponse.redirect(url);
+        for(const cookie of supabaseResponse.cookies.getAll())response.cookies.set(cookie);
+        return response;
+      }
+    }
+  }
   return supabaseResponse;
 }
