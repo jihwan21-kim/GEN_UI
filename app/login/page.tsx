@@ -13,6 +13,10 @@ export default async function LoginPage({ searchParams }: {
   const movieId = parseMovieId(params.film);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect(await signInDestination(supabase, user.id, movieId));
-  return <LoginForm movieId={movieId} callbackFailed={params.error === "oauth"} />;
+  if (user) {
+    const {data:allowed,error:allowError}=await supabase.rpc('cinema_member_allowed');
+    if(!allowError&&allowed) redirect(await signInDestination(supabase,user.id,movieId));
+    await supabase.auth.signOut();
+  }
+  return <LoginForm movieId={movieId} callbackFailed={params.error === "oauth"} accessDenied={params.error === "not_allowed"} />;
 }
