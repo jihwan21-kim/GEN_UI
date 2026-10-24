@@ -15,6 +15,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  const {data:allowed,error:allowError}=await supabase.rpc('cinema_member_allowed');
+  if(allowError||!allowed)redirect('/login?error=not_allowed');
 
   const [profileResult, publicProfileResult, rankingResult] = await Promise.all([
     supabase.from("profiles")
