@@ -13,6 +13,12 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
+      const {data:allowed,error:allowError}=await supabase.rpc('cinema_member_allowed');
+      if(allowError||!allowed){
+        await supabase.auth.signOut();
+        const denied=new URL('/login',origin);denied.searchParams.set('error','not_allowed');
+        return NextResponse.redirect(denied);
+      }
       return NextResponse.redirect(new URL(await signInDestination(supabase, data.user.id, movieId), origin));
     }
   }
