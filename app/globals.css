@@ -30,7 +30,7 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #047857;
+  outline: 3px solid #f59e0b;
   outline-offset: 3px;
 }
 

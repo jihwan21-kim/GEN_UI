@@ -1,65 +1,22 @@
-"use client";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { parseMovieId } from "@/lib/movie-navigation";
+import { signInDestination } from "@/lib/profile-onboarding";
+import LoginForm from "./login-form";
 
-import Link from "next/link";
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function signInWithGoogle() {
-    setErrorMessage("");
-    setIsLoading(true);
-
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-      setIsLoading(false);
-    }
+export default async function LoginPage({ searchParams }: {
+  searchParams: Promise<{ film?: string | string[]; error?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const movieId = parseMovieId(params.film);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const {data:allowed,error:allowError}=await supabase.rpc('cinema_member_allowed');
+    if(!allowError&&allowed) redirect(await signInDestination(supabase,user.id,movieId));
+    await supabase.auth.signOut();
   }
-
-  return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-900">
-      <section className="mx-auto max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
-          HW3 / Authentication
-        </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">Sign in</h1>
-        <p className="mt-3 text-zinc-600">
-          Use Google to sign in and return to the restaurant list. You can edit
-          your profile at any time.
-        </p>
-
-        <button
-          type="button"
-          onClick={signInWithGoogle}
-          disabled={isLoading}
-          className="mt-8 w-full rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? "Redirecting to Google..." : "Continue with Google"}
-        </button>
-
-        {errorMessage && (
-          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {errorMessage}
-          </p>
-        )}
-
-        <Link
-          href="/"
-          className="mt-6 inline-block text-sm font-medium text-emerald-700 hover:underline"
-        >
-          Back to restaurant list
-        </Link>
-      </section>
-    </main>
-  );
+  return <LoginForm movieId={movieId} callbackFailed={params.error === "oauth"} accessDenied={params.error === "not_allowed"} />;
 }

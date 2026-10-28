@@ -1,72 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OneLine Cinema 🎬
 
-## Getting Started
+**Find your next film in one line.**
 
-First, run the development server:
+A film community app built with **Next.js, Supabase Auth/Postgres/Storage, and Gemini**. Users write their **own full movie impressions** and AI turns them into three short reviews that help others decide what to watch. The user chooses **one** to publish; the community rates whether it is **Helpful / Not helpful**. AI drafts are grounded in the viewer's notes, with instructions to omit spoilers and avoid invented film details.
+
+## Branch safety
+
+This is the **`feature/movie-one-liners`** branch. The existing restaurant assignment stays unchanged in **`main`**. Do not merge this branch into main until you decide to replace the restaurant site. Both versions can use the existing Supabase project because this branch creates its own movie tables and doesn't alter restaurant tables.
+
+## Workflow
+
+### Week 5 iteration
+
+- A shorter introduction brings the film collection closer to the top of the page; smaller posters and room above the review section keep cards readable.
+- **Save film / Saved films** provides a reason to return. This shortlist is stored in the current browser, works without login, survives reloads and can be undone. It is not an account-synced Supabase feature. If storage is unavailable, the interface explains that saves last only for the current visit.
+- Logged-out voting controls lead to Google sign-in and retain the selected film. Once profile setup is complete, sign-in returns to the home page and reopens that film; the user then chooses their vote. The OAuth callback URL stays unchanged to preserve the existing Supabase redirect allowlist.
+- Accounts without a first name, last name, or public @username go to **Set up your profile** after sign-in. Their signed-in home-page access also returns to setup until those fields are complete. **Save and continue to films** sends them home after both profile records save successfully; future sign-ins return directly to films. An existing completed profile can still be edited without leaving the profile page.
+- Loading, retry, not-found, empty-search and empty-saved-list states have clear next actions. Mobile display settings close on Escape. Standard and alternate palettes retain visible selected states, focus outlines and readable labels.
+- `npm test` runs isolated workflow regression tests with mocked model/database calls. `npm run test:live` checks the deployed public Supabase reads and anonymous access denials without creating database records; set `TEST_SITE_URL` to inspect a particular deployment.
+
+See [`docs/week5-review.md`](docs/week5-review.md) for the rubric review and remaining external verification.
+
+1. Browse movies, search titles/year, and filter by genre. Click anywhere in a movie card, its poster/title, or **View all reviews** to open an accessible movie-detail overlay without leaving the page. Click outside, press Escape or the × button to close; browser deep links to `/movies/[id]` also remain available.
+2. Authenticated users add movies (title, year, 1–3 genres, optional licensed/original artwork). Only the original creator may edit or delete a movie.
+3. Select a movie and **write your own impressions** (20–5,000 characters).
+4. Pick a review focus: **Overall verdict / Who it's for / Mood & pace**. The default writing style is **Straightforward** (stored as `Serious` for compatibility); Witty, Poetic and Sarcastic remain available. New drafts always use spoiler-free instructions, even if an older client sends `spoilerFree: false`.
+5. Gemini returns **exactly three distinct short reviews**, aiming for 8–15 words and capped at 160 characters each. It emphasizes viewing qualities supported by the viewer's notes, with audience suggestions only when supported. The user checks the selected draft for accuracy and spoilers before publishing.
+6. Choose **one**. Only that one-liner becomes publicly visible after clicking **Publish selected**. The original thoughts and other two suggestions remain private.
+7. Authenticated users can mark a review **Helpful / Not helpful**, toggle an existing vote off, or change their vote. Votes rate the review's usefulness rather than the movie itself. Public aggregate counts rank reviews by net votes.
+
+This iteration requires **no additional SQL migration**: tone keys, vote values, tables and RPCs are unchanged. Existing reviews and vote totals are retained; earlier positive votes appear in Helpful counts and are included in creator rankings. Historical reviews are not rewritten or certified spoiler-free. The review focus is generation guidance, not a new public database field.
+
+No AI generation or publishing is faked or hardcoded. The optional starter movies in the SQL migration are **factual text metadata only** with original text-based placeholder artwork.
+
+## Setup
+
+### 1. Supabase SQL migration (required)
+
+In the **existing** Supabase project, open **SQL Editor** and run:
+
+[`supabase/movie_oneliners.sql`](supabase/movie_oneliners.sql)
+
+The migration creates independent movie tables with RLS, private drafts, public reviews, owner-only voting, atomic publishing, and 10 generation attempts per account per New York calendar day.
+
+### 1b. Community username, profile, and rankings migration (required for new features)
+
+After the core movie migration, also run [`supabase/movie_community.sql`](supabase/movie_community.sql) in the **same Supabase SQL Editor**. This is additive and does not change existing restaurant data or published movie review text.
+
+It creates `movie_public_profiles` with:
+- A unique lowercase **@username** (3–20 characters, begins with a letter, letters/numbers/underscores).
+- Optional public **bio** (up to 280 characters) and existing profile photo.
+- Row-level security: visitors may read only those public fields; only the account owner can change their public profile.
+- Permission to retrieve the **author's user ID** on an already-public movie review (still no access to its private draft, unpublished alternatives, voter IDs, or the author's email).
+- `movie_author_stats()`: public, aggregate-only creator metrics for creator profiles and the community leaderboard.
+
+The leaderboard has three sorts: **#1 film reviews**, **helpful votes**, and **published one-liners**. A #1 is a review with a *positive* net score (Helpful minus Not helpful) tied for the highest score on its film. Ties count for each tied review. Generated alternatives that were never published do **not** count toward the published total. If someone has not chosen a public username yet, old published reviews display the fallback label "Film fan" until they complete their public profile.
+
+**Important:** Code deployment does not apply SQL migrations. Run this script manually before testing author links, editing @usernames, /u/[handle] or /leaderboard. If you rerun the core movie SQL after this migration, rerun the community SQL to regrant the safe public author column.
+
+### Display and accessibility
+
+Use the navigation selectors to choose **Dark** or **Light** appearance, and **Standard colors** or the optional **Colorblind-friendly** high-contrast palette. Preferences are stored locally in the browser and carry between movie pages. Voting, selected writing styles, genre filters, and rank entries use words, icons and numeric labels as well as color; the alternate palette is an aid, not a substitute for individual accessibility testing.
+ It also creates a public **`movie-posters`** Storage bucket with owner-specific upload paths and 5MB MIME limits. It optionally seeds six movie titles so the site isn't empty.
+
+**Running GitHub code alone does not apply the SQL migration.** It must be run manually or applied via a proper migrations workflow.
+
+### 2. Vercel preview deployment
+
+Deploy branch `feature/movie-one-liners` as a **Preview**, or use a **separate Vercel project** linked to this branch. The existing production website should continue following `main`.
+
+Use the existing environment variables:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `GEMINI_API_KEY` (server-side only)
+- Optional `GEMINI_MODEL` (default `gemini-3.1-flash-lite`)
+
+If testing Google login at a new preview domain, add `https://<your-preview-host>/auth/callback` to Supabase **Authentication → URL Configuration → Redirect URLs**. Do not accidentally redirect users back to the restaurant production URL. Keep Vercel Deployment Protection disabled if your instructor must access the preview without an account.
+
+### 3. Verify
+
+- Logged-out visitor can browse movies/reviews but cannot generate or vote.
+- Google login sends an incomplete account to profile setup; saving a valid name and @username returns home. Completed accounts return directly to the movie version. Failed saves remain on setup.
+- A logged-in user can add a movie and choose 1–3 genres; duplicate title/year is rejected.
+- User can write a **20–5,000-character original impression**, pick a tone, and generate three AI options.
+- Choose one option and publish. **Only the chosen option** appears publicly after refreshing. The long impression and unchosen options never appear in public data.
+- Helpful/Not helpful persists across page refresh; repeat clicking cancels it; opposite click changes it.
+- A second user cannot edit/delete somebody else's movies, see another user's drafts, or vote as them.
+- Test proper handling of Gemini errors/quota (10 attempts per day).
+- Confirm RLS, public accessibility and deployment status from an incognito browser.
+
+### Community feature verification
+
+1. Run both Supabase SQL scripts in order. In `/profile`, create a unique username and bio.
+2. Check `/u/<username>` in an incognito window. The bio and published reviews should show, but **not** your email, legal name, private impressions or other AI suggestions.
+3. Publish from two separate accounts and confirm bylines link to the correct public profiles. An account without a username should show the neutral "Film fan" placeholder.
+4. Vote on reviews and verify published totals, helpful votes and positive-net film-leading reviews on both user profiles and the `/leaderboard` tabs.
+5. Switch between Dark/Light and Standard/Colorblind-friendly. Confirm the movie list, detail overlay, AI editor, login and profile screens use the selected palette and voting state remains visible without relying on color.
+
+## Privacy and rights
+
+Full personal film impressions and all three unpublished AI candidates are stored in `public.movie_review_drafts` with owner-only RLS, and **are not returned by the public review API**. The `publish_movie_review` SQL function checks ownership, locks the draft and publishes exactly one stored candidate, once.
+
+Copyrighted posters do not become freely reusable simply by appearing in image searches or databases. Artwork upload is optional and requires the uploader to confirm ownership or permission. Without artwork, the app displays original CSS-generated film-title cards. There is **no TMDB integration**.
+
+This feature branch retains legacy restaurant files for comparison. Only the home page and `/movies/[id]` route are used for the new movie experience.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run build
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Assignment #4 — Restaurant captions
-
-The existing restaurant list remains the home page. Each restaurant card includes AI caption generation and rating, using the existing Google login and profiles. `/restaurants` redirects to `/` so earlier links continue to work.
-
-- Logged-in users open a small generator inside a restaurant card, supply a short idea, and choose a tone. The server looks up the restaurant rather than trusting a client-supplied name.
-- Generated captions appear below the correct restaurant. Each row saves its restaurant foreign key, creator, caption, exact prompt, model, tone and timestamp.
-- Users insert one like/dislike per caption. A database unique constraint prevents duplicate votes, including concurrent requests. Saved votes remain visible after refresh.
-- Guests browse the list and captions, but must sign in to generate or vote. Individual votes and profiles are private; aggregate counts and caption content are public.
-- The generator allows 10 attempts per account per New York calendar day. The API key stays server-side.
-
-This targets students like Sam through short, playful captions for familiar NYC restaurants. The compact per-restaurant layout gives the existing list fresh content without a separate feed or new navigation system. AI captions are humor, not verified reviews, prices, or opening hours. Prompts are visible for transparency. The latest 100 restaurant captions are loaded across the collection.
-
-### Setup and validation
-
-1. Apply `supabase/hw4.sql` to the existing project (after the HW3 schema). It can be re-run if the earlier HW4 migration was applied. Existing standalone captions are preserved but are not shown in the restaurant list. New inserts require a valid restaurant link.
-2. Retain the existing Supabase URL and publishable key. Set `GEMINI_API_KEY` as a server-only Vercel environment variable and optionally set `GEMINI_MODEL` to a supported Gemini text model. Do not prefix the key with `NEXT_PUBLIC_`.
-3. Audit the real database's additional tables/storage policies, test Google login, profile editing/avatar uploads, generation and saved prompt, saved votes, duplicate rejection and a second user's isolation.
-4. Disable Vercel deployment protection, test Incognito, and submit the immutable deployment URL for the exact commit.
-
-The migration enables RLS on all public tables and replaces policies for the five app-owned tables. Restaurant/caption reads are public. Profiles and individual votes are owner-only. New captions must reference a restaurant; there is no user update/delete access for captions or votes. The limited aggregate function exposes only vote counts, and an atomic quota function uses the current authenticated user.
-
-RLS allows owners to insert caption rows directly through Supabase; provider provenance is assured through the application's Gemini endpoint, not every possible direct API insert. Real provider/auth integration still requires the service configuration above.
-
-Collect PM feedback during the Feedback Group, record it, and implement it before final submission. This iteration implements the user's feedback to retain the restaurant list and use a minimal, consistent light theme. Feedback from the designated PM has not yet been supplied.
-
-## Restaurant community update
-
-After `supabase/hw4.sql`, apply `supabase/hw4_restaurants.sql` in the Supabase SQL Editor. If rerunning hw4.sql later, rerun the additive migration afterward as well. It adds restaurant address/photo/creator fields, authenticated restaurant submissions, a public photo bucket (5 MB JPG/PNG/WebP), owner-only vote updates/deletes, and anonymous aggregate popularity. It preserves existing rows. No new environment variables are needed.
-
-Google login now lands on `/` for both existing and new users. Profiles remain editable from navigation. Votes toggle off when pressed again, or switch when the opposite button is pressed. Restaurant ranking uses all linked captions' likes minus dislikes, with likes and restaurant ID as tie breakers; it is explicitly not a dining review score. Existing restaurants use labeled representative Unsplash food photos, not verified venue photos. Community submissions can upload their own photos. Name/address duplicates are rejected.
-
-Validation: lint and production build passed; 27 PostgreSQL permission/schema checks covered vote changes/cancellation, cross-user isolation, anonymous denial, restaurant ownership/photo paths, duplicate submissions, popularity, quota boundaries, and rerunning migrations. Live restaurant submission/photo upload require applying the additive SQL.
-
-### Restaurant editing and responsive layout
-Apply `supabase/hw4_restaurant_edit.sql` after the restaurant community migration. Only the creator can update name, category, address and photo; creator/ID ownership columns cannot be changed. Reapply it if earlier permission migrations are rerun. User-added restaurants without an uploaded image have an empty placeholder. The three original restaurants retain their representative photos. Editing preserves caption/vote relationships, supports photo replacement/removal, and validates duplicate addresses/names. The list uses one column on phones, two from 768px and three from 1280px. Lint/build and 31 permission/schema checks passed; live owner editing needs the new SQL.
