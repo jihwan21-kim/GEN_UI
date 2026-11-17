@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "system" | "dark" | "light";
 type Vision = "standard" | "accessible";
 type ThemeContextValue = {
   theme: Theme;
@@ -15,7 +15,7 @@ type ThemeContextValue = {
 const CinemaThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function CinemaThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("system");
   const [vision, setVision] = useState<Vision>("standard");
   const [ready, setReady] = useState(false);
 
@@ -23,7 +23,7 @@ export function CinemaThemeProvider({ children }: { children: ReactNode }) {
     try {
       const storedTheme = localStorage.getItem("cinema-theme");
       const storedVision = localStorage.getItem("cinema-vision");
-      if (storedTheme === "dark" || storedTheme === "light") setTheme(storedTheme);
+      if (storedTheme === "system" || storedTheme === "dark" || storedTheme === "light") setTheme(storedTheme);
       if (storedVision === "standard" || storedVision === "accessible") setVision(storedVision);
     } catch {
       // Browser storage is optional. The app works without it.
@@ -33,8 +33,22 @@ export function CinemaThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    document.documentElement.dataset.cinemaTheme = theme;
-    document.documentElement.dataset.cinemaVision = vision;
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyPreferences = () => {
+      const resolvedTheme = theme === "system"
+        ? systemDark.matches ? "dark" : "light"
+        : theme;
+      document.documentElement.dataset.cinemaTheme = resolvedTheme;
+      document.documentElement.dataset.cinemaVision = vision;
+    };
+    applyPreferences();
+    if (theme !== "system") return;
+    systemDark.addEventListener("change", applyPreferences);
+    return () => systemDark.removeEventListener("change", applyPreferences);
+  }, [theme, vision, ready]);
+
+  useEffect(() => {
+    if (!ready) return;
     try {
       localStorage.setItem("cinema-theme", theme);
       localStorage.setItem("cinema-vision", vision);
@@ -56,8 +70,8 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
       <div className="grid gap-4">
         <fieldset>
           <legend className="cinema-muted mb-2 text-xs font-bold uppercase tracking-wider">Appearance</legend>
-          <div className="grid grid-cols-2 gap-2">
-            {(["dark", "light"] as Theme[]).map((value) => (
+          <div className="grid grid-cols-3 gap-2">
+            {(["system", "dark", "light"] as Theme[]).map((value) => (
               <button
                 key={value}
                 type="button"
@@ -65,7 +79,7 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
                 onClick={() => ctx.setTheme(value)}
                 className={`rounded-xl border px-3 py-2.5 text-sm font-bold ${ctx.theme === value ? "cinema-accent-bg" : "cinema-card"}`}
               >
-                {value === "dark" ? "☾ Dark" : "☀ Light"}
+                {value === "system" ? "System" : value === "dark" ? "☾ Dark" : "☀ Light"}
               </button>
             ))}
           </div>
@@ -96,11 +110,12 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
         <label className="sr-only" htmlFor="cinema-theme-select">Appearance</label>
         <select
           id="cinema-theme-select"
-          aria-label="Appearance: dark or light"
+          aria-label="Appearance: system, dark, or light"
           value={ctx.theme}
           onChange={(event) => ctx.setTheme(event.target.value as Theme)}
           className="cinema-display-select min-h-10 appearance-none rounded-lg py-2 pl-3 pr-9 text-xs font-semibold"
         >
+          <option value="system">System</option>
           <option value="dark">☾ Dark</option>
           <option value="light">☀ Light</option>
         </select>
