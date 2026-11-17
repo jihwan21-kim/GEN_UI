@@ -79,7 +79,7 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
                 onClick={() => ctx.setTheme(value)}
                 className={`rounded-xl border px-3 py-2.5 text-sm font-bold ${ctx.theme === value ? "cinema-accent-bg" : "cinema-card"}`}
               >
-                {value === "system" ? "System" : value === "dark" ? "☾ Dark" : "☀ Light"}
+                {value === "system" ? "Match device" : value === "dark" ? "☾ Dark" : "☀ Light"}
               </button>
             ))}
           </div>
@@ -110,12 +110,12 @@ export function CinemaDisplaySettings({ compact = false }: { compact?: boolean }
         <label className="sr-only" htmlFor="cinema-theme-select">Appearance</label>
         <select
           id="cinema-theme-select"
-          aria-label="Appearance: system, dark, or light"
+          aria-label="Appearance: match device, dark, or light"
           value={ctx.theme}
           onChange={(event) => ctx.setTheme(event.target.value as Theme)}
           className="cinema-display-select min-h-10 appearance-none rounded-lg py-2 pl-3 pr-9 text-xs font-semibold"
         >
-          <option value="system">System</option>
+          <option value="system">Match device</option>
           <option value="dark">☾ Dark</option>
           <option value="light">☀ Light</option>
         </select>
