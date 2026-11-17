@@ -147,8 +147,8 @@ export default function MovieForm({
   }
 
   return (
-    <div className={movie ? "mt-5" : "self-start w-full"}>
-      <div className="flex flex-wrap items-center gap-2">
+    <div className={movie ? "mt-5" : open ? "w-full" : "w-full sm:w-[180px]"}>
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
           aria-expanded={open}
