@@ -133,9 +133,9 @@ export default function MovieReviewComposer({ movie }: { movie: Movie }) {
         ref={triggerRef}
         onClick={() => { setMessage(""); setOpen(true); }}
         disabled={refreshing}
-        className="cinema-accent-bg inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-60"
+        className="cinema-accent-bg inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-xl px-2 py-2 text-xs font-bold disabled:opacity-60 sm:px-3 sm:text-sm"
       >
-        ✨ Create useful review
+        Create useful review
       </button>
       {success && <p aria-live="polite" role="status" className="cinema-status rounded-lg p-2 text-xs">{success}</p>}
       {open && (
