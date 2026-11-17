@@ -67,22 +67,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ f
       <MovieSelectionProvider initialMovieId={initialMovieId}>
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-8 sm:pt-10">
         <CinemaNavigation signedIn={Boolean(user)} />
-        <section className="cinema-hero relative mt-5 overflow-hidden rounded-2xl border px-5 py-6 sm:mt-7 sm:px-8 sm:py-8">
-          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-amber-300/10 blur-3xl" />
+        <section className="cinema-hero relative mt-5 overflow-hidden rounded-2xl border px-5 py-8 sm:mt-7 sm:px-10 sm:py-12">
+          <div aria-hidden="true" className="pointer-events-none absolute -top-28 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-amber-300/10 blur-3xl" />
           <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-5 select-none text-[12rem] leading-none text-white/[0.035] sm:text-[18rem]">✦</div>
-          <div className="relative max-w-3xl">
-            <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.27em]">
+          <div className="relative mx-auto max-w-4xl text-center">
+            <p className="cinema-accent-text text-xs font-bold uppercase tracking-[0.22em] sm:text-sm">
               A little insight. A better movie night.
             </p>
-            <h1 className="mt-3 text-3xl font-black leading-[1.12] tracking-tight sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-black leading-[1.12] tracking-tight sm:text-5xl">
               What should you watch?<br />
               <span className="cinema-accent-text">Find out in one line.</span>
             </h1>
-            <p className="cinema-muted mt-3 max-w-2xl text-sm leading-6 sm:text-base">
+            <p className="cinema-muted mx-auto mt-4 max-w-2xl text-sm leading-6 sm:text-base sm:leading-7">
               Find a film that fits your mood with short, AI-assisted viewer reviews.
               Save your next pick, or share an insight that helps someone else choose.
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-start">
+            <div className="mt-6 grid grid-cols-2 items-start gap-3 sm:flex sm:flex-wrap sm:justify-center">
               <a href="#movie-collection-title" className="cinema-accent-bg inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-bold sm:w-[180px] sm:px-5">
                 Explore films ↓
               </a>
@@ -92,7 +92,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ f
                 </Link>
               )}
             </div>
-            <div className="cinema-muted mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+            <div className="cinema-muted mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs">
               <span><strong className="cinema-text">{movies.length}</strong> films</span>
               <span><strong className="cinema-text">{reviews.length}</strong> viewer reviews</span>
               <span>New AI drafts use spoiler-free guidance</span>
