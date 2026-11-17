@@ -173,12 +173,12 @@ export default function MovieReviews({
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {variant === "preview" && (onOpenDetails ? (
           <button type="button" onClick={onOpenDetails}
-            className="cinema-outline inline-flex min-h-10 flex-1 items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-bold">
+            className="cinema-outline inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-xl px-2 py-2.5 text-center text-xs font-bold sm:px-3 sm:text-sm">
             View all reviews →
           </button>
         ) : (
           <Link href={`/movies/${movie.id}`}
-            className="cinema-outline inline-flex min-h-10 flex-1 items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-bold">
+            className="cinema-outline inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-xl px-2 py-2.5 text-center text-xs font-bold sm:px-3 sm:text-sm">
             View all reviews →
           </Link>
         ))}
