@@ -82,7 +82,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ f
               Find a film that fits your mood with short, AI-assisted viewer reviews.
               Save your next pick, or share an insight that helps someone else choose.
             </p>
-            <div className="mt-6 grid grid-cols-2 items-start gap-3 sm:flex sm:flex-wrap sm:justify-center">
+            <div className="mt-6 flex flex-col items-center gap-3">
               <a href="#movie-collection-title" className="cinema-accent-bg inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-bold sm:w-[180px] sm:px-5">
                 Explore films ↓
               </a>
