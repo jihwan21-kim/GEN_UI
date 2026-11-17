@@ -147,7 +147,7 @@ export default function MovieForm({
   }
 
   return (
-    <div className={movie ? "mt-5" : ""}>
+    <div className={movie ? "mt-5" : "self-start w-full"}>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
